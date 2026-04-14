@@ -566,13 +566,13 @@ function renderW1(){
   // Built area with optional pre/post-filled text
   const placeholder='<span style="color:var(--gray);font-size:.88em;">Click words above to build your sentence…</span>';
   let builtDisplay='';
-  if(prefix)builtDisplay+=`<span style="color:var(--gray);font-weight:600;margin-right:4px;">${escH(prefix)}</span>`;
+  if(prefix)builtDisplay+=`<span style="font-weight:600;margin-right:4px;">${escH(prefix)}</span>`;
   if(bwords){
     builtDisplay+=bwords;
   } else {
     builtDisplay+=placeholder;
   }
-  if(suffix)builtDisplay+=`<span style="color:var(--gray);font-weight:600;margin-left:2px;">${escH(suffix)}</span>`;
+  if(suffix)builtDisplay+=`<span style="font-weight:600;margin-left:2px;">${escH(suffix)}</span>`;
 
   const sep=prefix?' ':'';
   const fullAns=prefix+sep+q.ans+suffix;
