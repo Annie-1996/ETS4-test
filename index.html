@@ -569,10 +569,10 @@ function renderW1(){
   if(prefix)builtDisplay+=`<span style="color:var(--gray);font-weight:600;margin-right:4px;">${escH(prefix)}</span>`;
   if(bwords){
     builtDisplay+=bwords;
-    if(suffix)builtDisplay+=`<span style="color:var(--gray);font-weight:600;margin-left:2px;">${escH(suffix)}</span>`;
   } else {
     builtDisplay+=placeholder;
   }
+  if(suffix)builtDisplay+=`<span style="color:var(--gray);font-weight:600;margin-left:2px;">${escH(suffix)}</span>`;
 
   const sep=prefix?' ':'';
   const fullAns=prefix+sep+q.ans+suffix;
