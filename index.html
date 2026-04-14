@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="page-title">TOEFL iBT Practice Test</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --pri:#6C82E6;--acc:#C65A2E;--bg:#F3EDE4;--txt:#3B2A22;
+  --ok:#4CAF50;--err:#F44336;--card:#FFFAF5;--border:#EDE8E3;--gray:#9A8880;
+}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--txt);line-height:1.7;min-height:100vh;}
+.wrap{max-width:900px;margin:0 auto;padding:20px;}
+
+/* Timer */
+.tbar{position:sticky;top:0;background:#fff;border-bottom:2px solid var(--border);padding:10px 20px;display:flex;justify-content:space-between;align-items:center;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.tleft{display:flex;flex-direction:column;gap:2px;}
+.sec-lbl{font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);}
+.part-lbl{font-size:.82em;color:var(--gray);}
+.tdisp{font-size:1.5em;font-weight:800;color:var(--pri);font-variant-numeric:tabular-nums;letter-spacing:.02em;}
+.tdisp.warn{color:var(--acc);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+.tup{background:var(--acc);color:#fff;text-align:center;padding:9px;font-weight:600;font-size:.92em;}
+
+/* Buttons */
+.btn{padding:10px 22px;border:none;border-radius:12px;cursor:pointer;font-size:.93em;font-weight:600;transition:all .18s;font-family:inherit;}
+.btn-pri{background:linear-gradient(135deg,#6C82E6,#5568D4);color:#fff;box-shadow:0 4px 14px rgba(108,130,230,.38);}
+.btn-pri:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(108,130,230,.5);}
+.btn-acc{background:var(--acc);color:#fff;}
+.btn-acc:hover{background:#b54f28;}
+.btn-gray{background:#E8E4DF;color:var(--txt);}
+.btn-gray:hover{background:#ddd8d2;}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;}
+
+/* Cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:18px;}
+
+/* Split layout */
+.split{display:grid;grid-template-columns:44% 54%;gap:18px;align-items:start;}
+.left-panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;position:sticky;top:68px;max-height:calc(100vh - 90px);overflow-y:auto;}
+.right-panel{display:flex;flex-direction:column;gap:14px;overflow-y:auto;max-height:calc(100vh - 90px);}
+
+/* Nav row */
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:22px;padding-top:14px;border-top:1px solid var(--border);}
+.nav-r{display:flex;gap:10px;align-items:center;}
+
+/* Part header */
+.ph{margin-bottom:22px;padding-bottom:14px;border-bottom:2px solid var(--border);}
+.pt{font-size:1.35em;font-weight:800;color:var(--pri);}
+.ps{color:var(--gray);font-size:.86em;margin-top:2px;}
+
+/* Instruction */
+.inst{background:#EEF1FF;border-left:3px solid var(--pri);padding:11px 15px;border-radius:0 8px 8px 0;margin-bottom:18px;font-size:.88em;}
+
+/* Progress */
+.prog-out{background:var(--border);border-radius:4px;height:5px;margin:6px 0;}
+.prog-in{background:var(--pri);height:100%;border-radius:4px;transition:width .3s;}
+
+/* MCQ */
+.qcard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.qtxt{font-weight:600;margin-bottom:11px;font-size:.93em;}
+.opt{display:flex;align-items:flex-start;gap:9px;padding:9px 13px;border:1.5px solid var(--border);border-radius:8px;margin-bottom:7px;cursor:pointer;transition:all .14s;font-size:.9em;}
+.opt:hover{border-color:var(--pri);background:#f0f3ff;}
+.opt.sel{border-color:var(--pri);background:#eef1ff;}
+.opt.cor{border-color:var(--ok);background:#e8f5e9;}
+.opt.wrong{border-color:var(--err);background:#ffebee;}
+.opt-lt{font-weight:700;color:var(--pri);min-width:18px;}
+.ans-hint{font-size:.8em;color:var(--ok);margin-top:5px;font-weight:600;}
+
+/* Letter-box blanks (one box per missing letter) */
+.lboxes{display:inline-flex;gap:3px;vertical-align:middle;margin:0 2px;}
+.lb{width:26px;height:28px;border:none;border-bottom:2.5px solid var(--pri);background:transparent;text-align:center;font-size:.92em;font-family:Helvetica,Arial,sans-serif;font-weight:600;color:var(--acc);outline:none;transition:border-color .15s,background .15s;padding:0;caret-color:var(--acc);}
+.lb:focus{border-bottom-color:var(--acc);background:rgba(108,130,230,.07);}
+.lb.lb-cor{border-bottom-color:var(--ok);color:var(--ok);background:rgba(76,175,80,.08);}
+.lb.lb-wrong{border-bottom-color:var(--err);color:var(--err);background:rgba(244,67,54,.08);}
+.lb:read-only{cursor:default;}
+.para{font-size:.95em;line-height:2.5;}
+.blank-wrap{display:inline-block;position:relative;white-space:nowrap;vertical-align:baseline;}
+.bnum{font-size:.65em;vertical-align:super;color:var(--pri);font-weight:800;margin-right:1px;}
+.pfx{font-weight:700;color:var(--txt);font-size:.95em;letter-spacing:.01em;}
+.bi{border:none;border-bottom:2.5px solid var(--pri);background:transparent;padding:1px 2px;font-size:.93em;font-family:'Courier New',Courier,monospace;letter-spacing:3px;color:var(--acc);font-weight:700;outline:none;transition:border-color .15s;text-align:left;min-width:14px;}
+.bi::placeholder{letter-spacing:4px;color:#bbb;font-weight:400;}
+.bi:focus{border-bottom-color:var(--acc);}
+.bi.cor{border-bottom-color:var(--ok);color:var(--ok);}
+.bi.wrong{border-bottom-color:var(--err);color:var(--err);}
+
+/* Word chips */
+.wbank{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0;}
+.chip{padding:6px 14px;background:var(--pri);color:#fff;border-radius:20px;cursor:pointer;font-size:.88em;user-select:none;transition:all .14s;}
+.chip:hover{background:#5568d4;transform:translateY(-1px);}
+.chip.used{background:#c0c8f0;cursor:default;transform:none;}
+.built{min-height:48px;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;margin:10px 0;background:#fff;font-size:.93em;}
+.bword{display:inline-block;padding:3px 10px;background:var(--acc);color:#fff;border-radius:14px;margin:2px;cursor:pointer;font-size:.88em;}
+.bword:hover{background:#b54f28;}
+
+/* Textarea */
+.ta{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:13px;font-size:.93em;font-family:inherit;line-height:1.75;resize:vertical;min-height:150px;outline:none;background:#fff;color:var(--txt);}
+.ta:focus{border-color:var(--pri);}
+.wc{font-size:.82em;color:var(--gray);text-align:right;margin-top:5px;}
+.wc.warn{color:var(--acc);}
+
+/* Discussion */
+.disc{background:#fff8f5;border:1px solid #f0e0d8;border-radius:12px;padding:18px;margin-bottom:18px;}
+.spk{margin-bottom:12px;}
+.spk-name{font-weight:700;color:var(--acc);font-size:.78em;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+
+/* Passage nav */
+.pnav{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.pdot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78em;font-weight:700;cursor:pointer;transition:all .15s;}
+
+/* Intro */
+.intro{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center;padding:20px;}
+.ititle{font-size:2.6em;font-weight:900;color:var(--pri);margin-bottom:4px;}
+.iinfo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0;width:100%;max-width:480px;}
+.icard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center;}
+.icard h3{color:var(--pri);font-size:1.05em;margin-bottom:3px;}
+.icard p{color:var(--gray);font-size:.87em;}
+.struct{max-width:480px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:28px;text-align:left;}
+
+/* AI score */
+.sc-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:18px;}
+.sc-num{font-size:2.2em;font-weight:900;color:var(--pri);}
+.fb-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;}
+.fb-box{background:#f9f5f0;border-radius:8px;padding:12px;}
+.fb-lbl{font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;}
+
+/* Spinner */
+.spin{display:inline-block;width:20px;height:20px;border:2.5px solid var(--border);border-top-color:var(--pri);border-radius:50%;animation:sp .75s linear infinite;vertical-align:middle;}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* Results */
+.res-total{text-align:center;padding:36px;background:var(--card);border-radius:16px;margin-bottom:22px;}
+.res-big{font-size:4.5em;font-weight:900;color:var(--pri);}
+.res-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px;}
+.res-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center;}
+.res-s{font-size:2em;font-weight:800;}
+
+/* Results review sections */
+.rev-sec{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;}
+.rev-title{font-weight:800;font-size:1em;color:var(--pri);padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:4px;}
+.rev-q{padding:10px;border-radius:8px;margin-bottom:8px;font-size:.86em;}
+@media(max-width:480px){
+  .split{grid-template-columns:1fr;}
+  .left-panel{position:static;max-height:260px;}
+  .right-panel{max-height:none;}
+  .iinfo,.res-grid,.fb-grid{grid-template-columns:1fr;}
+}
+</style>
+<script src="exam-data.js"></script>
+</head>
+<body>
+
+<div id="tup" style="display:none;" class="tup">⏰ Time is up! You may still continue.</div>
+<div id="tbar" class="tbar" style="display:none;">
+  <div class="tleft">
+    <div class="sec-lbl" id="slbl">Reading Section</div>
+    <div class="part-lbl" id="plbl">Part 1 — Complete the Words</div>
+  </div>
+  <div class="tdisp" id="tdisp">27:00</div>
+</div>
+<div class="wrap" id="app"></div>
+
+<script>
+// ===== DATA & SCHEMA =====
+const D = window.EXAM_DATA;
+const isETS = !!(D.m1 && D.m2); // two-module ETS schema vs legacy r1/r2/r3
+
+// ===== STATE =====
+const S = {
+  screen:'intro',
+  // ETS reading
+  module:1, mPart:1, tIdx:0,
+  m1r1ans:Array(10).fill(''), m2r1ans:Array(10).fill(''),
+  m1rans:Array(10).fill(null), m2rans:Array(10).fill(null),
+  m1Time:12*60, m2Time:12*60, m1Exp:false, m2Exp:false,
+  // Legacy reading
+  rPart:1,
+  r1ans:Array(10).fill(''), r2ans:Array(15).fill(null), r3ans:Array(15).fill(null),
+  rTime:20*60, rExp:false,
+  // Writing (shared)
+  wPart:1, wQIdx:0,
+  w1built:Array.from({length:10},()=>[]),
+  w2ans:'', w3ans:'',
+  w1Time:5*60, w2Time:7*60, w3Time:10*60,
+  w1Exp:false, w2Exp:false, w3Exp:false,
+  tInt:null, done:false,
+  w2sc:null, w3sc:null, w2ld:false, w3ld:false, w2er:null, w3er:null
+};
+
+// ===== W1 ORDERS =====
+let W1ORDERS=null;
+function getW1Order(i){if(!W1ORDERS)W1ORDERS=D.w1.map(q=>shuffle([...q.words]));return W1ORDERS[i];}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+// ===== HELPERS =====
+const $=id=>document.getElementById(id);
+const app=()=>$('app');
+function wc(t){return t.trim()===''?0:t.trim().split(/\s+/).length;}
+function fmt(s){return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;}
+function onW2Input(v){S.w2ans=v;const c=wc(v);const el=$('w2wc');if(el){el.textContent=`Words: ${c} / 80–120`;el.className=`wc${(c<80||c>120)?' warn':''}`;}}
+function onW3Input(v){S.w3ans=v;const c=wc(v);const el=$('w3wc');if(el){el.textContent=`Words: ${c} / 100–150`;el.className=`wc${(c<100||c>150)?' warn':''}`;}}
+
+// ===== TIMER =====
+function startTimer(mode){
+  clearInterval(S.tInt);
+  S.timerMode=mode;
+  updTimer();
+  S.tInt=setInterval(()=>{
+    const m=S.timerMode;
+    const key=m+'Time', expKey=m+'Exp';
+    if(S[key]>0){S[key]--;updTimer();}
+    else if(!S[expKey]){
+      S[expKey]=true;
+      if(m==='m1') goModule2();
+      else if(m==='m2') goWriting();
+      else if(m==='r') goWriting();
+      else if(m==='w1') nextWPart();
+      else if(m==='w2') nextWPart();
+      else if(m==='w3') goResults();
+    }
+  },1000);
+}
+function updTimer(){
+  const m=S.timerMode||'r';
+  const t=m==='m1'?S.m1Time:m==='m2'?S.m2Time:m==='r'?S.rTime:m==='w1'?S.w1Time:m==='w2'?S.w2Time:S.w3Time;
+  const el=$('tdisp');if(!el)return;
+  el.textContent=fmt(t);
+  el.className='tdisp'+(t<300?' warn':'');
+}
+function stopTimer(){clearInterval(S.tInt);S.tInt=null;}
+
+// ===== NAV =====
+function goReading(){
+  $('tbar').style.display='flex';$('tup').style.display='none';
+  if(isETS){
+    S.screen='r';S.module=1;S.mPart=1;S.tIdx=0;
+    startTimer('m1');renderReadingETS();
+  } else {
+    S.screen='r';S.rPart=1;S.tIdx=0;
+    startTimer('r');renderReading();
+  }
+}
+function goModule2(){
+  stopTimer();
+  $('tup').style.display='none';
+  S.module=2;S.mPart=1;S.tIdx=0;
+  startTimer('m2');renderReadingETS();
+}
+function goWriting(){
+  stopTimer();S.screen='w';S.wPart=1;S.wQIdx=0;
+  $('tup').style.display='none';$('slbl').textContent='Writing Section';
+  startTimer('w1');renderWriting();
+}
+function goResults(){
+  stopTimer();S.screen='res';S.done=true;
+  $('tbar').style.display='none';$('tup').style.display='none';
+  renderResults();
+  autoScoreSequential();
+}
+async function autoScoreSequential(){
+  if(S.w2ans.trim()&&!S.w2sc&&!S.w2ld){
+    S.w2ld=true;renderResults();
+    try{var ctx='Situation: '+D.w2.situation+'\nTasks: '+D.w2.tasks.join(' / ');S.w2sc=await callScore(S.w2ans,D.w2.rubric,ctx);}
+    catch(e){S.w2er='Scoring error: '+e.message;}
+    S.w2ld=false;renderResults();
+  }
+  if(S.w3ans.trim()&&!S.w3sc&&!S.w3ld){
+    S.w3ld=true;renderResults();
+    try{var ctx='Professor '+D.w3.prof.name+': "'+D.w3.prof.msg+'"\n'+D.w3.sa.name+': "'+D.w3.sa.txt+'"\n'+D.w3.sb.name+': "'+D.w3.sb.txt+'"';S.w3sc=await callScore(S.w3ans,D.w3.rubric,ctx);}
+    catch(e){S.w3er='Scoring error: '+e.message;}
+    S.w3ld=false;renderResults();
+  }
+}
+async function autoScoreW2(){
+  if(S.w2ld)return;
+  S.w2ld=true;S.w2sc=null;S.w2er=null;renderResults();
+  try{var ctx='Situation: '+D.w2.situation+'\nTasks: '+D.w2.tasks.join(' / ');S.w2sc=await callScore(S.w2ans,D.w2.rubric,ctx);}
+  catch(e){S.w2er='Scoring error: '+e.message;}
+  S.w2ld=false;renderResults();
+}
+async function autoScoreW3(){
+  if(S.w3ld)return;
+  S.w3ld=true;S.w3sc=null;S.w3er=null;renderResults();
+  try{var ctx='Professor '+D.w3.prof.name+': "'+D.w3.prof.msg+'"\n'+D.w3.sa.name+': "'+D.w3.sa.txt+'"\n'+D.w3.sb.name+': "'+D.w3.sb.txt+'"';S.w3sc=await callScore(S.w3ans,D.w3.rubric,ctx);}
+  catch(e){S.w3er='Scoring error: '+e.message;}
+  S.w3ld=false;renderResults();
+}
+
+// ===== ETS READING =====
+function renderReadingETS(){
+  $('slbl').textContent='Reading Section';
+  $('plbl').textContent=`Module ${S.module} of 2 — `+(S.mPart===1?'Complete the Words':'Reading');
+  if(S.mPart===1)renderR1ETS();
+  else renderReadingPanel();
+}
+function renderR1ETS(){
+  const mod=S.module===1?D.m1:D.m2;
+  const segs=mod.r1.segs, bl=mod.r1.blanks;
+  const r1ans=S.module===1?S.m1r1ans:S.m2r1ans;
+  let html='<p class="para">'+segs[0];
+  for(let i=0;i<10;i++){
+    const v=r1ans[i]||'', suf=bl[i].suffix, letters=v.split('');
+    let boxes='';
+    for(let j=0;j<suf.length;j++){
+      let cls='lb';
+      if(S.done){const t=(letters[j]||'').toLowerCase(),e=suf[j].toLowerCase();cls+=t===e?' lb-cor':' lb-wrong';}
+      boxes+=`<input class="${cls}" data-i="${i}" data-j="${j}" maxlength="1" value="${escH(letters[j]||'')}" autocomplete="off" spellcheck="false"${S.done?' readonly':''}>`;
+    }
+    html+=`<span class="blank-wrap"><sup class="bnum">${i+1}</sup><span class="pfx">${escH(bl[i].prefix)}</span><span class="lboxes">${boxes}</span></span>`;
+    html+=segs[i+1];
+  }
+  html+=segs[11]+'</p>';
+  let keyHTML='';
+  if(S.done){
+    keyHTML='<div style="margin-top:22px;border-top:1px solid var(--border);padding-top:16px;"><div style="font-weight:700;color:var(--pri);margin-bottom:10px;font-size:.9em;">Answer Key</div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">';
+    bl.forEach((b,i)=>{
+      const u=r1ans[i]||'', ok=u.toLowerCase()===b.suffix.toLowerCase();
+      keyHTML+=`<div style="padding:9px 8px;border-radius:8px;background:${ok?'#e8f5e9':'#ffebee'};font-size:.83em;text-align:center;">
+        <div style="font-weight:700;color:${ok?'var(--ok)':'var(--err)'};">${i+1}. ${escH(b.ans)}</div>
+        <div style="font-size:.85em;color:var(--gray);margin-top:2px;">${ok?'✓ Correct':`answer: <em>${escH(b.suffix)}</em>`}</div>
+        ${!ok&&u?`<div style="color:var(--err);font-size:.85em;">you typed: ${escH(u)}</div>`:''}
+      </div>`;
+    });
+    keyHTML+='</div></div>';
+  }
+  app().innerHTML=`
+    <div class="ph"><div class="pt">Module ${S.module} — Complete the Words</div><div class="ps">Questions 1–10 · Type the missing letters to complete each word</div></div>
+    <div class="inst">💡 Each box = one missing letter. The word's first letters are shown — just fill in the rest.<br>Example: <strong>develop</strong>[<span style="display:inline-flex;gap:2px;vertical-align:middle;"><span style="display:inline-block;width:22px;height:22px;border-bottom:2px solid var(--acc);text-align:center;font-size:.9em;color:var(--acc);font-weight:600;">m</span><span style="display:inline-block;width:22px;height:22px;border-bottom:2px solid var(--acc);text-align:center;font-size:.9em;color:var(--acc);font-weight:600;">e</span><span style="display:inline-block;width:22px;height:22px;border-bottom:2px solid var(--acc);text-align:center;font-size:.9em;color:var(--acc);font-weight:600;">n</span><span style="display:inline-block;width:22px;height:22px;border-bottom:2px solid var(--acc);text-align:center;font-size:.9em;color:var(--acc);font-weight:600;">t</span>}] = <strong>development</strong></div>
+    <div class="card">${html}${keyHTML}</div>
+    <div class="nav"><div></div><button class="btn btn-acc" onclick="nextMPart()">Next Part →</button></div>`;
+  document.querySelectorAll('.lb').forEach(el=>{
+    el.addEventListener('keydown',e=>{
+      const i=parseInt(el.dataset.i),j=parseInt(el.dataset.j);
+      if(e.key==='Backspace'&&!el.value&&j>0){e.preventDefault();const p=document.querySelector(`.lb[data-i="${i}"][data-j="${j-1}"]`);if(p){p.value='';p.focus();collectR1ETS(i);}}
+      if(e.key==='ArrowRight'){const n=document.querySelector(`.lb[data-i="${i}"][data-j="${j+1}"]`);if(n)n.focus();}
+      if(e.key==='ArrowLeft'&&j>0){const p=document.querySelector(`.lb[data-i="${i}"][data-j="${j-1}"]`);if(p)p.focus();}
+    });
+    el.addEventListener('input',e=>{
+      const i=parseInt(el.dataset.i),j=parseInt(el.dataset.j);
+      if(el.value.length>1)el.value=el.value.slice(-1);
+      collectR1ETS(i);
+      if(el.value){
+        const bl2=(S.module===1?D.m1:D.m2).r1.blanks;
+        if(j<bl2[i].suffix.length-1){const n=document.querySelector(`.lb[data-i="${i}"][data-j="${j+1}"]`);if(n)n.focus();}
+      }
+    });
+  });
+}
+function collectR1ETS(i){
+  const boxes=document.querySelectorAll(`.lb[data-i="${i}"]`);
+  const val=Array.from(boxes).map(b=>b.value).join('');
+  if(S.module===1)S.m1r1ans[i]=val;else S.m2r1ans[i]=val;
+}
+function saveR1ETS(){for(let i=0;i<10;i++)collectR1ETS(i);}
+function nextMPart(){saveR1ETS();S.mPart=2;S.tIdx=0;renderReadingETS();}
+
+function renderReadingPanel(){
+  const mod=S.module===1?D.m1:D.m2;
+  const texts=mod.reading.texts;
+  const rans=S.module===1?S.m1rans:S.m2rans;
+  const txt=texts[S.tIdx];
+  const dotRow=texts.map((_,i)=>`<div class="pdot" style="background:${i===S.tIdx?'var(--acc)':'var(--border)'};color:${i===S.tIdx?'#fff':'var(--gray)'};" onclick="goText(${i})">${i+1}</div>`).join('');
+  let qhtml='';
+  txt.qi.forEach(qi=>{
+    const q=mod.reading.qs[qi];
+    qhtml+=`<div class="qcard"><div class="qtxt">${qi+1}. ${q.q}</div>`;
+    q.opts.forEach((o,oi)=>{
+      const sel=rans[qi]===oi;let cls='opt';
+      if(S.done){cls+=oi===q.ans?' cor':(sel?' wrong':'');}else if(sel)cls+=' sel';
+      qhtml+=`<div class="${cls}" onclick="selMCQ(${qi},${oi})"><span class="opt-lt">${'ABCD'[oi]}</span><span>${escH(o)}</span></div>`;
+    });
+    if(S.done&&rans[qi]!==q.ans)qhtml+=`<div class="ans-hint">✓ ${escH(q.opts[q.ans])}</div>`;
+    qhtml+='</div>';
+  });
+  const isLast=S.tIdx===texts.length-1;
+  const nextBtn=!isLast
+    ?`<button class="btn btn-acc" onclick="nextText()">Next Text →</button>`
+    :S.module===1
+      ?`<button class="btn btn-acc" onclick="goModule2()">Start Module 2 →</button>`
+      :`<button class="btn btn-acc" onclick="goWriting()">Start Writing →</button>`;
+  app().innerHTML=`
+    <div class="ph"><div class="pt">Module ${S.module} — Reading</div><div class="ps">Text ${S.tIdx+1} of ${texts.length} · ${txt.tag}</div></div>
+    <div class="pnav">${dotRow}<span style="font-size:.82em;color:var(--gray);">Text ${S.tIdx+1}/${texts.length}: ${escH(txt.title)}</span></div>
+    <div class="split">
+      <div class="left-panel">
+        <div style="font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--pri);margin-bottom:10px;">${escH(txt.tag)}</div>
+        <div style="font-weight:700;margin-bottom:10px;">${escH(txt.title)}</div>
+        <div style="white-space:pre-line;font-size:.9em;line-height:1.8;">${escH(txt.content)}</div>
+      </div>
+      <div class="right-panel">${qhtml}</div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-gray" onclick="prevText()" ${S.tIdx===0?'disabled':''}>← Previous Text</button>
+      ${nextBtn}
+    </div>`;
+}
+function selMCQ(qi,oi){
+  if(S.done)return;
+  var rp=document.querySelector('.right-panel');var st=rp?rp.scrollTop:0;
+  if(S.module===1)S.m1rans[qi]=oi;else S.m2rans[qi]=oi;
+  renderReadingPanel();
+  var rp2=document.querySelector('.right-panel');if(rp2)rp2.scrollTop=st;
+}
+function goText(i){S.tIdx=i;renderReadingPanel();}
+function nextText(){const t=(S.module===1?D.m1:D.m2).reading.texts;if(S.tIdx<t.length-1){S.tIdx++;renderReadingPanel();}}
+function prevText(){if(S.tIdx>0){S.tIdx--;renderReadingPanel();}}
+
+// ===== LEGACY READING =====
+function renderReading(){
+  $('slbl').textContent='Reading Section';
+  const pnames=['Part 1 — Complete the Words','Part 2 — Reading in Daily Life','Part 3 — Academic Passages'];
+  $('plbl').textContent=pnames[S.rPart-1];
+  if(S.rPart===1)renderR1();else if(S.rPart===2)renderR2();else renderR3();
+}
+function nextRPart(){if(S.rPart===1)saveR1();if(S.rPart<3){S.rPart++;S.tIdx=0;renderReading();}else goWriting();}
+function saveR1(){for(let i=0;i<10;i++)collectR1(i);}
+function renderR1(){
+  const segs=D.r1.segs,bl=D.r1.blanks;
+  let html='<p class="para">'+segs[0];
+  for(let i=0;i<10;i++){
+    const v=S.r1ans[i]||'',suf=bl[i].suffix,letters=v.split('');
+    let boxes='';
+    for(let j=0;j<suf.length;j++){
+      let cls='lb';
+      if(S.done){const t=(letters[j]||'').toLowerCase(),e=suf[j].toLowerCase();cls+=t===e?' lb-cor':' lb-wrong';}
+      const val=escH(letters[j]||'');
+      boxes+=`<input class="${cls}" data-i="${i}" data-j="${j}" maxlength="1" value="${val}" autocomplete="off" spellcheck="false"${S.done?' readonly':''}>`;
+    }
+    html+=`<span class="blank-wrap" style="white-space:nowrap;"><sup class="bnum">${i+1}</sup><span class="pfx">${escH(bl[i].prefix)}</span><span class="lboxes">${boxes}</span></span>`;
+    html+=segs[i+1];
+  }
+  html+=segs[11]+'</p>';
+  let keyHTML='';
+  if(S.done){
+    keyHTML='<div style="margin-top:22px;border-top:1px solid var(--border);padding-top:16px;"><div style="font-weight:700;color:var(--pri);margin-bottom:10px;font-size:.9em;">Answer Key</div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">';
+    bl.forEach((b,i)=>{
+      const u=S.r1ans[i]||'',ok=u.toLowerCase()===b.suffix.toLowerCase();
+      keyHTML+=`<div style="padding:9px 8px;border-radius:8px;background:${ok?'#e8f5e9':'#ffebee'};font-size:.83em;text-align:center;">
+        <div style="font-weight:700;color:${ok?'var(--ok)':'var(--err)'};">${i+1}. ${escH(b.ans)}</div>
+        <div style="font-size:.85em;color:var(--gray);margin-top:2px;">${ok?'✓ Correct':`answer: <em>${escH(b.suffix)}</em>`}</div>
+        ${!ok&&u?`<div style="color:var(--err);font-size:.85em;">you typed: ${escH(u)}</div>`:''}
+      </div>`;
+    });
+    keyHTML+='</div></div>';
+  }
+  app().innerHTML=`
+    <div class="ph"><div class="pt">Reading Part 1 — Complete the Words</div><div class="ps">Questions 1–10 · Type the missing letters to complete each word</div></div>
+    <div class="inst">💡 Each box = one missing letter. The word's first letters are shown — just fill in the rest.<br>Example: <strong>sim</strong> <span style="display:inline-flex;gap:2px;vertical-align:middle;"><span style="display:inline-block;width:22px;height:22px;border-bottom:2px solid var(--acc);text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:.9em;color:var(--acc);font-weight:600;">p</span><span style="display:inline-block;width:22px;height:22px;border-bottom:2px solid var(--acc);text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:.9em;color:var(--acc);font-weight:600;">l</span><span style="display:inline-block;width:22px;height:22px;border-bottom:2px solid var(--acc);text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:.9em;color:var(--acc);font-weight:600;">e</span></span> = <strong>simple</strong> &nbsp;|&nbsp; <strong>bu</strong> <span style="display:inline-flex;gap:2px;vertical-align:middle;"><span style="display:inline-block;width:22px;height:22px;border-bottom:2px solid var(--acc);text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:.9em;color:var(--acc);font-weight:600;">t</span></span> = <strong>but</strong></div>
+    <div class="card"><div style="font-size:.78em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--acc);margin-bottom:16px;">Topic: Climate Change &amp; Sustainability</div>${html}${keyHTML}</div>
+    <div class="nav"><div></div><button class="btn btn-acc" onclick="nextRPart()">Next Part →</button></div>`;
+  document.querySelectorAll('.lb').forEach(el=>{
+    el.addEventListener('keydown',e=>{
+      const i=parseInt(el.dataset.i),j=parseInt(el.dataset.j);
+      if(e.key==='Backspace'&&!el.value&&j>0){e.preventDefault();const prev=document.querySelector(`.lb[data-i="${i}"][data-j="${j-1}"]`);if(prev){prev.value='';prev.focus();collectR1(i);}}
+      if(e.key==='ArrowRight'){const next=document.querySelector(`.lb[data-i="${i}"][data-j="${j+1}"]`);if(next)next.focus();}
+      if(e.key==='ArrowLeft'&&j>0){const prev=document.querySelector(`.lb[data-i="${i}"][data-j="${j-1}"]`);if(prev)prev.focus();}
+    });
+    el.addEventListener('input',e=>{
+      const i=parseInt(el.dataset.i),j=parseInt(el.dataset.j);
+      if(el.value.length>1)el.value=el.value.slice(-1);
+      collectR1(i);
+      if(el.value){const suf=D.r1.blanks[i].suffix;if(j<suf.length-1){const next=document.querySelector(`.lb[data-i="${i}"][data-j="${j+1}"]`);if(next)next.focus();}}
+    });
+  });
+}
+function collectR1(i){const boxes=document.querySelectorAll(`.lb[data-i="${i}"]`);S.r1ans[i]=Array.from(boxes).map(b=>b.value).join('');}
+function renderR2(){
+  const txt=D.r2.texts[S.tIdx];
+  const dotRow=D.r2.texts.map((_,i)=>`<div class="pdot" style="background:${i===S.tIdx?'var(--acc)':'var(--border)'};color:${i===S.tIdx?'#fff':'var(--gray)'};" onclick="goT2(${i})">${i+1}</div>`).join('');
+  let qhtml='';
+  txt.qi.forEach(qi=>{
+    const q=D.r2.qs[qi];
+    qhtml+=`<div class="qcard"><div class="qtxt">${qi+1}. ${q.q}</div>`;
+    q.opts.forEach((o,oi)=>{
+      const sel=S.r2ans[qi]===oi;let cls='opt';
+      if(S.done){cls+=oi===q.ans?' cor':(sel?' wrong':'');}else if(sel)cls+=' sel';
+      qhtml+=`<div class="${cls}" onclick="selR2(${qi},${oi})"><span class="opt-lt">${'ABCD'[oi]}</span><span>${escH(o)}</span></div>`;
+    });
+    if(S.done&&S.r2ans[qi]!==q.ans)qhtml+=`<div class="ans-hint">✓ ${escH(q.opts[q.ans])}</div>`;
+    qhtml+='</div>';
+  });
+  app().innerHTML=`
+    <div class="ph"><div class="pt">Reading Part 2 — Reading in Daily Life</div><div class="ps">Text ${S.tIdx+1} of 5 · ${txt.tag}</div></div>
+    <div class="pnav">${dotRow}<span style="font-size:.82em;color:var(--gray);">Text ${S.tIdx+1}/5: ${escH(txt.title)}</span></div>
+    <div class="split">
+      <div class="left-panel">
+        <div style="font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--pri);margin-bottom:10px;">${escH(txt.tag)}</div>
+        <div style="font-weight:700;margin-bottom:10px;">${escH(txt.title)}</div>
+        <div style="white-space:pre-line;font-size:.9em;line-height:1.8;">${escH(txt.content)}</div>
+      </div>
+      <div class="right-panel">${qhtml}</div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-gray" onclick="prevT2()" ${S.tIdx===0?'disabled':''}>← Previous Text</button>
+      ${S.tIdx<4?`<button class="btn btn-acc" onclick="nextT2()">Next Text →</button>`:`<button class="btn btn-acc" onclick="nextRPart()">Next Part →</button>`}
+    </div>`;
+}
+function selR2(qi,oi){if(S.done)return;var rp=document.querySelector('.right-panel');var st=rp?rp.scrollTop:0;S.r2ans[qi]=oi;renderR2();var rp2=document.querySelector('.right-panel');if(rp2)rp2.scrollTop=st;}
+function goT2(i){S.tIdx=i;renderR2();}
+function nextT2(){if(S.tIdx<4){S.tIdx++;renderR2();}}
+function prevT2(){if(S.tIdx>0){S.tIdx--;renderR2();}}
+function renderR3(){
+  const p=D.r3.passages[S.tIdx];
+  const dotRow=D.r3.passages.map((_,i)=>`<div class="pdot" style="background:${i===S.tIdx?'var(--acc)':'var(--border)'};color:${i===S.tIdx?'#fff':'var(--gray)'};" onclick="goP3(${i})">${i+1}</div>`).join('');
+  let qhtml='';
+  p.qi.forEach(qi=>{
+    const q=D.r3.qs[qi];
+    qhtml+=`<div class="qcard"><div class="qtxt">${qi+1}. ${q.q}</div>`;
+    q.opts.forEach((o,oi)=>{
+      const sel=S.r3ans[qi]===oi;let cls='opt';
+      if(S.done){cls+=oi===q.ans?' cor':(sel?' wrong':'');}else if(sel)cls+=' sel';
+      qhtml+=`<div class="${cls}" onclick="selR3(${qi},${oi})"><span class="opt-lt">${'ABCD'[oi]}</span><span>${escH(o)}</span></div>`;
+    });
+    if(S.done&&S.r3ans[qi]!==q.ans)qhtml+=`<div class="ans-hint">✓ ${escH(q.opts[q.ans])}</div>`;
+    qhtml+='</div>';
+  });
+  app().innerHTML=`
+    <div class="ph"><div class="pt">Reading Part 3 — Academic Passages</div><div class="ps">${escH(p.sub)} · Questions ${p.qi[0]+1}–${p.qi[p.qi.length-1]+1}</div></div>
+    <div class="pnav">${dotRow}<span style="font-size:.82em;color:var(--gray);">Passage ${S.tIdx+1}/3: ${escH(p.title)}</span></div>
+    <div class="split">
+      <div class="left-panel">
+        <div style="font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--pri);margin-bottom:6px;">${escH(p.sub)}</div>
+        <div style="font-weight:700;font-size:1.05em;margin-bottom:12px;">${escH(p.title)}</div>
+        <div style="font-size:.9em;line-height:1.85;white-space:pre-line;">${escH(p.content)}</div>
+      </div>
+      <div class="right-panel">${qhtml}</div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-gray" onclick="prevP3()" ${S.tIdx===0?'disabled':''}>← Previous Passage</button>
+      ${S.tIdx<2?`<button class="btn btn-acc" onclick="nextP3()">Next Passage →</button>`:`<button class="btn btn-acc" onclick="goWriting()">Start Writing →</button>`}
+    </div>`;
+}
+function selR3(qi,oi){if(S.done)return;var rp=document.querySelector('.right-panel');var st=rp?rp.scrollTop:0;S.r3ans[qi]=oi;renderR3();var rp2=document.querySelector('.right-panel');if(rp2)rp2.scrollTop=st;}
+function goP3(i){S.tIdx=i;renderR3();}
+function nextP3(){if(S.tIdx<2){S.tIdx++;renderR3();}}
+function prevP3(){if(S.tIdx>0){S.tIdx--;renderR3();}}
+
+// ===== WRITING =====
+function renderWriting(){
+  $('slbl').textContent='Writing Section';
+  const pn=['Part 1 — Build a Sentence · 5 min','Part 2 — Email Writing · 7 min','Part 3 — Academic Discussion · 10 min'];
+  $('plbl').textContent=pn[S.wPart-1];
+  if(S.wPart===1)renderW1();else if(S.wPart===2)renderW2();else renderW3();
+}
+function nextWPart(){
+  stopTimer();$('tup').style.display='none';S.wPart++;
+  if(S.wPart===2)startTimer('w2');else if(S.wPart===3)startTimer('w3');
+  renderWriting();
+}
+function prevWPart(){
+  stopTimer();$('tup').style.display='none';S.wPart--;
+  startTimer('w'+S.wPart);renderWriting();
+}
+function renderW1(){
+  const qi=S.wQIdx,q=D.w1[qi];
+  const ord=getW1Order(qi),built=S.w1built[qi];
+  const used=new Set(built);
+  const prefix=q.prefix||'',suffix=q.suffix||'';
+  const chips=ord.map((w,i)=>`<span class="chip${used.has(i)?' used':''}" onclick="${used.has(i)?'':'addW('+qi+','+i+')'}">${escH(w)}</span>`).join('');
+  const bwords=built.map((wi,pos)=>S.done
+    ?`<span class="bword" style="cursor:default;opacity:.88;">${escH(ord[wi])}</span>`
+    :`<span class="bword" onclick="rmW(${qi},${pos})">${escH(ord[wi])}</span>`
+  ).join(' ');
+
+  // Built area with optional pre/post-filled text
+  const placeholder='<span style="color:var(--gray);font-size:.88em;">Click words above to build your sentence…</span>';
+  let builtDisplay='';
+  if(prefix)builtDisplay+=`<span style="color:var(--gray);font-weight:600;margin-right:4px;">${escH(prefix)}</span>`;
+  if(bwords){
+    builtDisplay+=bwords;
+    if(suffix)builtDisplay+=`<span style="color:var(--gray);font-weight:600;margin-left:2px;">${escH(suffix)}</span>`;
+  } else {
+    builtDisplay+=placeholder;
+  }
+
+  const sep=prefix?' ':'';
+  const fullAns=prefix+sep+q.ans+suffix;
+
+  let resHTML='';
+  if(S.done){
+    const sentence=built.map(wi=>ord[wi]).join(' ').toLowerCase().trim();
+    const ok=sentence===q.ans.toLowerCase().trim();
+    resHTML=`<div style="margin-top:14px;padding:13px;border-radius:8px;background:${ok?'#e8f5e9':'#ffebee'};">
+      <div style="font-weight:700;color:${ok?'var(--ok)':'var(--err)'};">${ok?'✓ Correct!':'✗ Incorrect'}</div>
+      <div style="font-size:.88em;margin-top:4px;">Correct: <strong>${escH(fullAns)}</strong></div>
+    </div>`;
+  }
+  app().innerHTML=`
+    <div class="ph"><div class="pt">Writing Part 1 — Build a Sentence</div><div class="ps">Question ${qi+1} of 10</div></div>
+    <div class="prog-out"><div class="prog-in" style="width:${(qi+1)/10*100}%"></div></div>
+    <div class="card" style="margin-top:18px;">
+      <div style="font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:6px;">Context</div>
+      <div style="font-size:1.08em;font-weight:600;margin-bottom:18px;">"${escH(q.ctx)}"</div>
+      <div style="font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:6px;">Word Bank — click to add</div>
+      <div class="wbank">${chips}</div>
+      <div style="font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin:14px 0 6px;">Your Sentence — click a word to remove</div>
+      <div class="built">${builtDisplay}</div>
+      ${resHTML}
+    </div>
+    <div class="nav">
+      ${qi>0?`<button class="btn btn-gray" onclick="prevW1()">← Previous</button>`:'<div></div>'}
+      <div class="nav-r">
+        <button class="btn btn-gray" onclick="clrW(${qi})">Clear</button>
+        ${qi<9?`<button class="btn btn-acc" onclick="nextW1()">Next →</button>`:`<button class="btn btn-acc" onclick="nextWPart()">Next Part →</button>`}
+      </div>
+    </div>`;
+}
+function addW(qi,wi){if(S.done||S.w1built[qi].includes(wi))return;S.w1built[qi]=[...S.w1built[qi],wi];renderW1();}
+function rmW(qi,pos){if(S.done)return;const a=[...S.w1built[qi]];a.splice(pos,1);S.w1built[qi]=a;renderW1();}
+function clrW(qi){S.w1built[qi]=[];renderW1();}
+function nextW1(){if(S.wQIdx<9){S.wQIdx++;renderW1();}}
+function prevW1(){if(S.wQIdx>0){S.wQIdx--;renderW1();}}
+function renderW2(){
+  const p=D.w2,wct=wc(S.w2ans);
+  const wcCls=`wc${(wct<p.range[0]||wct>p.range[1])?' warn':''}`;
+  let scHTML='';
+  if(S.w2ld)scHTML=`<div style="text-align:center;padding:20px;"><div class="spin"></div><div style="margin-top:8px;color:var(--gray);font-size:.88em;">AI is evaluating your response…</div></div>`;
+  else if(S.w2sc)scHTML=renderScore(S.w2sc);
+  else if(S.w2er)scHTML=`<div style="color:var(--err);padding:12px;border-radius:8px;background:#ffebee;font-size:.88em;">${escH(S.w2er)}</div>`;
+  const taskList=p.tasks.map(t=>`<li style="margin-bottom:5px;">${escH(t)}</li>`).join('');
+  app().innerHTML=`
+    <div class="ph"><div class="pt">Writing Part 2 — Email Writing</div><div class="ps">Task · 80–120 words · 7 minutes</div></div>
+    <div class="card">
+      <div style="font-size:.88em;line-height:1.8;margin-bottom:14px;">${escH(p.situation)}</div>
+      <ul style="padding-left:20px;font-size:.88em;line-height:2;color:var(--txt);">${taskList}</ul>
+      <div style="margin-top:14px;font-size:.82em;color:var(--gray);">Write as much as you can in complete sentences.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:10px;">Your Response</div>
+      <div style="font-size:.83em;color:var(--gray);margin-bottom:10px;font-family:'Courier New',monospace;">To: ${escH(p.toLine)}<br>Subject: ${escH(p.subLine)}</div>
+      <textarea class="ta" id="w2ta" rows="8" placeholder="Write your email here…" oninput="onW2Input(this.value)">${escH(S.w2ans)}</textarea>
+      <div class="${wcCls}" id="w2wc">Words: ${wct} / 80–120</div>
+    </div>
+    ${scHTML}
+    <div class="nav">
+      <button class="btn btn-gray" onclick="prevWPart()">← Previous Part</button>
+      <div class="nav-r"><button class="btn btn-acc" onclick="nextWPart()">Next Part →</button></div>
+    </div>`;
+}
+async function scoreW2(){
+  const ta=$('w2ta');if(ta)S.w2ans=ta.value;
+  if(!S.w2ans.trim()){alert('Please write your response first.');return;}
+  S.w2ld=true;S.w2sc=null;S.w2er=null;renderW2();
+  const ctx=`Situation: ${D.w2.situation}\nTasks: ${D.w2.tasks.join(' / ')}`;
+  try{S.w2sc=await callScore(S.w2ans,D.w2.rubric,ctx);}catch(e){S.w2er='Scoring error: '+e.message;}
+  S.w2ld=false;renderW2();
+}
+function renderW3(){
+  const p=D.w3,wct=wc(S.w3ans);
+  const wcCls=`wc${(wct<p.range[0]||wct>p.range[1])?' warn':''}`;
+  let scHTML='';
+  if(S.w3ld)scHTML=`<div style="text-align:center;padding:20px;"><div class="spin"></div><div style="margin-top:8px;color:var(--gray);font-size:.88em;">AI is evaluating your response…</div></div>`;
+  else if(S.w3sc)scHTML=renderScore(S.w3sc);
+  else if(S.w3er)scHTML=`<div style="color:var(--err);padding:12px;border-radius:8px;background:#ffebee;font-size:.88em;">${escH(S.w3er)}</div>`;
+  app().innerHTML=`
+    <div class="ph"><div class="pt">Writing Part 3 — Academic Discussion</div><div class="ps">Task · 100–150 words · 10 minutes</div></div>
+    <div class="inst" style="margin-bottom:14px;">${escH(p.inst)}</div>
+    <div class="disc">
+      <div class="spk">
+        <div style="font-size:.72em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:4px;">${escH(p.course)}</div>
+        <div class="spk-name">🎓 Professor ${escH(p.prof.name)}</div>
+        <div style="font-size:.9em;line-height:1.8;">${escH(p.prof.msg)}</div>
+      </div>
+      <div class="spk" style="margin-top:14px;padding-top:14px;border-top:1px solid #f0e0d8;">
+        <div class="spk-name">📝 ${escH(p.sa.name)}</div>
+        <div style="font-size:.88em;line-height:1.78;">${escH(p.sa.txt)}</div>
+      </div>
+      <div class="spk" style="margin-top:12px;">
+        <div class="spk-name">📝 ${escH(p.sb.name)}</div>
+        <div style="font-size:.88em;line-height:1.78;">${escH(p.sb.txt)}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:8px;">Your Post</div>
+      <textarea class="ta" id="w3ta" rows="9" placeholder="Write your response here…" oninput="onW3Input(this.value)">${escH(S.w3ans)}</textarea>
+      <div class="${wcCls}" id="w3wc">Words: ${wct} / 100–150</div>
+    </div>
+    ${scHTML}
+    <div class="nav">
+      <button class="btn btn-gray" onclick="prevWPart()">← Previous Part</button>
+      <div class="nav-r"><button class="btn btn-acc" onclick="goResults()">Finish &amp; See Results →</button></div>
+    </div>`;
+}
+async function scoreW3(){
+  const ta=$('w3ta');if(ta)S.w3ans=ta.value;
+  if(!S.w3ans.trim()){alert('Please write your response first.');return;}
+  S.w3ld=true;S.w3sc=null;S.w3er=null;renderW3();
+  try{
+    const ctx=`Professor ${D.w3.prof.name}: "${D.w3.prof.msg}"\n${D.w3.sa.name}: "${D.w3.sa.txt}"\n${D.w3.sb.name}: "${D.w3.sb.txt}"`;
+    S.w3sc=await callScore(S.w3ans,D.w3.rubric,ctx);
+  }catch(e){S.w3er='Scoring error: '+e.message;}
+  S.w3ld=false;renderW3();
+}
+
+// ===== AI SCORING (preserved exactly) =====
+async function callScore(response,rubric,ctx){
+  const isEmail=rubric.indexOf('email')!==-1||rubric.indexOf('Email')!==-1;
+  const taskNote=isEmail
+    ? 'This is a TOEFL Write an Email task (target: 80-120 words). A Band 5 email must: address ALL bullet-point tasks explicitly, open with a clear purpose statement, use varied sentence structures (simple, compound, complex, and compound-complex), include at least one subordinate clause and one polite conditional (e.g., "I would appreciate it if..."), and close professionally. The Band 5 example must be 100-120 words. IMPORTANT: Format the email with proper line breaks using \\n. Each part on its own line: salutation, body paragraphs, closing, and name. Example structure: "Dear [Name],\\n\\n[Body paragraph 1]\\n\\n[Body paragraph 2]\\n\\nSincerely,\\n[Your name]"'
+    : 'This is a TOEFL Academic Discussion task (target: 100-150 words). A Band 5 response must: clearly state a personal position in the opening sentence, engage directly with at least one classmate\'s point (agree, disagree, or extend it), support the argument with a concrete example or hypothetical scenario, use a mix of sentence types including at least one adverbial clause, one relative clause, and one concessive clause (e.g., "While X may be true..."), and end with a forward-looking or synthesizing statement. The Band 5 example must be 130-150 words.';
+  const prompt='You are a certified 2026 TOEFL iBT writing examiner. Evaluate this student response for: '+rubric+'.\n\n'
+    +taskNote+'\n\n'
+    +'Context:\n'+ctx+'\n\n'
+    +'Student Response:\n'+response+'\n\n'
+    +(isEmail
+    ? 'Score 0–5 by averaging these 5 dimensions (round to nearest integer):\n1. Task Fulfillment: 5=All required points fully addressed; 4=Most points addressed, minor missing detail; 3=Some points missing or unclear; 2=Many points missing or off-topic; 1=Almost no task completion; 0=No response\n2. Elaboration: 5=Each idea has clear explanation or example; 4=Ideas explained but not deeply; 3=Some ideas lack explanation; 2=Mostly unsupported statements; 1=Bare phrases only; 0=No content\n3. Language Use: 5=Varied sentence structures + precise vocabulary; 4=Some variation + generally appropriate vocabulary; 3=Limited variation, repetitive wording; 2=Very simple sentence patterns; 1=Fragmented or incorrect sentences; 0=Not in English\n4. Social Conventions: 5=Fully appropriate tone and format (greeting, closing, politeness); 4=Mostly appropriate with minor issues; 3=Some awkward or inconsistent tone; 2=Inappropriate tone; 1=No awareness of format; 0=None\n5. Accuracy: 5=0–2 minor errors, no impact on understanding; 4=Few errors, meaning always clear; 3=Noticeable errors but understandable; 2=Frequent errors affecting clarity; 1=Errors make text hard to understand; 0=Unreadable\n\n'
+    : 'Calibrate your scoring for non-native English learners preparing for TOEFL. A score of 4–5 should be awarded to responses that clearly address the prompt, express a position with reasonable support, and demonstrate sufficient language control for academic communication — even if the writing is not perfectly sophisticated. Reserve scores of 1–2 for responses that are largely off-topic, incoherent, or grammatically incomprehensible. For a non-native speaker at TOEFL B2 level, a response that addresses all parts of the prompt with a clear position, at least one concrete example, and generally coherent structure should receive a minimum score of 4, regardless of sentence variety.\n\nScore 0–5 by averaging these 5 dimensions (round to nearest integer):\n1. Relevance: 5=Directly answers topic and clearly contributes; 4=Mostly relevant; 3=Partially relevant; 2=Often off-topic; 1=Mostly irrelevant; 0=No response\n2. Argument Development: 5=Clear opinion + at least 2 supported ideas with explanation or example; 4=Clear opinion + at least 1 supported idea; 3=Opinion present but weak support; 2=Ideas unclear or unsupported; 1=No clear argument; 0=None\n3. Language Use: 5=Varied sentence structures + precise vocabulary; 4=Some variation + generally appropriate vocabulary; 3=Limited variation, repetitive wording; 2=Very simple sentence patterns; 1=Fragmented or incorrect sentences; 0=Not in English\n4. Clarity: 5=Ideas flow logically and are easy to follow; 4=Mostly clear with minor confusion; 3=Some unclear connections; 2=Hard to follow; 1=Mostly unclear; 0=None\n5. Accuracy: 5=0–2 minor errors, no impact on understanding; 4=Few errors, meaning always clear; 3=Noticeable errors but understandable; 2=Frequent errors affecting clarity; 1=Errors make text hard to understand; 0=Unreadable\n\n'
+    )
+    +'Return ONLY valid JSON with no markdown fences:\n'
+    +'{"score":0,'
+    +'"rationale":"中文評分理由，說明得分依據（60字內）",'
+    +'"strengths":"中文優點，具體指出寫得好的地方（70字內）",'
+    +'"weaknesses":"中文改進建議，具體說明如何提升（70字內）",'
+    +'"corrected_sentence":"Take the weakest sentence from the student response and rewrite it with richer grammar and vocabulary. Format: Original → Improved",'
+    +(isEmail
+      ? '"band5_example":"Write a complete Band 5 model email. STRICT: must be exactly 100–120 words, count carefully. Use proper email format with \\n line breaks between salutation, body paragraphs, closing, and name. Varied syntax, sophisticated vocabulary, address all tasks. Do NOT copy the student response."}'
+      : '"band5_example":"Write a complete Band 5 model academic discussion post. STRICT: must be exactly 130–150 words, count carefully. State a clear position in sentence 1, engage with a classmate by name, support with a concrete example, use cohesive devices (furthermore, nevertheless, in contrast). Do NOT copy the student response."}');
+  const res=await fetch('https://dawn-tooth-4dc5.a103405151.workers.dev',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2500,messages:[{role:'user',content:prompt}]})
+  });
+  if(!res.ok)throw new Error('HTTP '+res.status);
+  const data=await res.json();
+  const txt=data.content?.filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('')||'';
+  return JSON.parse(txt.replace(/```json|```/g,'').trim());
+}
+function renderScore(sc){
+  const stars='★'.repeat(sc.score)+'☆'.repeat(5-sc.score);
+  return `<div class="sc-card">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
+      <div>
+        <div class="sc-num">${sc.score}<span style="font-size:.45em;color:var(--gray)">/5</span></div>
+        <div style="color:var(--acc);font-size:1.15em;letter-spacing:2px;">${stars}</div>
+      </div>
+      <div>
+        <div style="font-weight:700;">AI Evaluation</div>
+        <div style="font-size:.88em;color:var(--gray);">${escH(sc.rationale)}</div>
+      </div>
+    </div>
+    <div class="fb-grid">
+      <div class="fb-box"><div class="fb-lbl" style="color:var(--ok);">✓ 優點</div><div style="font-size:.87em;">${escH(sc.strengths)}</div></div>
+      <div class="fb-box"><div class="fb-lbl" style="color:var(--err);">✗ 改進空間</div><div style="font-size:.87em;">${escH(sc.weaknesses)}</div></div>
+    </div>
+    <div style="background:#f5f0eb;border-radius:8px;padding:12px;margin-bottom:10px;">
+      <div class="fb-lbl" style="color:var(--pri);">✏️ Sentence Improvement</div>
+      <div style="font-size:.87em;font-style:italic;white-space:pre-wrap;">${escH(sc.corrected_sentence)}</div>
+    </div>
+    <div style="background:#eef1ff;border-radius:8px;padding:12px;">
+      <div class="fb-lbl" style="color:var(--pri);">🏆 Band 5 Example</div>
+      <div style="font-size:.87em;white-space:pre-wrap;line-height:1.85;">${escH(sc.band5_example)}</div>
+    </div>
+  </div>`;
+}
+
+// ===== RESULTS HELPERS =====
+function revMCQ(ok,correctText,chosenText){
+  if(ok)return '<div style="color:var(--ok);font-size:.9em;">✓ '+escH(correctText)+'</div>';
+  return '<div style="color:var(--err);font-size:.9em;">✗ You chose: '+escH(chosenText||'(no answer)')+'</div>'
+        +'<div style="color:var(--ok);font-size:.9em;">✓ Correct: '+escH(correctText)+'</div>';
+}
+function revSent(ok,correct,typed){
+  if(ok)return '<div style="color:var(--ok);font-size:.9em;">✓ '+escH(correct)+'</div>';
+  return '<div style="color:var(--err);font-size:.9em;">✗ You: '+escH(typed||'(no answer)')+'</div>'
+        +'<div style="color:var(--ok);font-size:.9em;">✓ Correct: '+escH(correct)+'</div>';
+}
+function revBlank(ok,full,prefix,typed){
+  if(ok)return '<div style="color:var(--ok);font-size:.9em;">✓ Correct</div>';
+  return '<div style="color:var(--err);font-size:.9em;">✗ You: '+escH(prefix+(typed||'…'))+'</div>';
+}
+function wScoreBlock(ld,sc,er){
+  if(ld)return '<div style="text-align:center;padding:16px;"><div class="spin"></div><div style="margin-top:8px;color:var(--gray);font-size:.85em;">AI is scoring your response…</div></div>';
+  if(sc)return renderScore(sc);
+  if(er)return '<div style="color:var(--err);padding:10px;background:#ffebee;border-radius:8px;font-size:.85em;">'+escH(er)+'</div>';
+  return '<div style="color:var(--gray);font-size:.85em;padding:8px 0;">(No response submitted)</div>';
+}
+
+// TOEFL 0-6 scale
+var R_TABLE=[
+  {min:40,max:40,score:6.0},{min:37,max:39,score:5.5},{min:33,max:36,score:5.0},
+  {min:30,max:32,score:4.5},{min:26,max:29,score:4.0},{min:23,max:25,score:3.5},
+  {min:19,max:22,score:3.0},{min:16,max:18,score:2.5},{min:13,max:15,score:2.0},
+  {min:9,max:12,score:1.5},{min:6,max:8,score:1.0},{min:1,max:5,score:0.5},{min:0,max:0,score:0.0}
+];
+function toflR(a,b,c){var t=a+b+c;for(var k=0;k<R_TABLE.length;k++){if(t>=R_TABLE[k].min&&t<=R_TABLE[k].max)return R_TABLE[k].score;}return 0;}
+function toflW(w1ok,w2sc,w3sc){
+  var parts=[w1ok/10],weights=[1];
+  if(w2sc){parts.push(w2sc.score/5);weights.push(1);}
+  if(w3sc){parts.push(w3sc.score/5);weights.push(1);}
+  var sum=0,wtot=0;
+  for(var k=0;k<parts.length;k++){sum+=parts[k]*weights[k];wtot+=weights[k];}
+  return Math.round(sum/wtot*6*2)/2;
+}
+function toflTotal(r,w){return Math.round((r+w)/2*2)/2;}
+function scoreColor(v){return v>=5?'var(--ok)':v>=3.5?'var(--pri)':'var(--err)';}
+function fmtScore(v){return Number(v).toFixed(1);}
+
+// ===== RESULTS =====
+function renderResults(){
+  // ── Score calculation ──
+  var r1ok,r2ok,r3ok;
+  if(isETS){
+    var m1r1ok=S.m1r1ans.filter(function(a,i){return a.toLowerCase()===D.m1.r1.blanks[i].suffix.toLowerCase();}).length;
+    var m2r1ok=S.m2r1ans.filter(function(a,i){return a.toLowerCase()===D.m2.r1.blanks[i].suffix.toLowerCase();}).length;
+    var m1rok=S.m1rans.filter(function(a,i){return a===D.m1.reading.qs[i]?.ans;}).length;
+    var m2rok=S.m2rans.filter(function(a,i){return a===D.m2.reading.qs[i]?.ans;}).length;
+    r1ok=m1r1ok+m2r1ok; r2ok=m1rok; r3ok=m2rok;
+  } else {
+    r1ok=S.r1ans.filter(function(a,i){return a.toLowerCase().trim()===D.r1.blanks[i].suffix.toLowerCase();}).length;
+    r2ok=S.r2ans.filter(function(a,i){return a===D.r2.qs[i]?.ans;}).length;
+    r3ok=S.r3ans.filter(function(a,i){return a===D.r3.qs[i]?.ans;}).length;
+  }
+  var w1ok=S.w1built.filter(function(b,qi){
+    var ord=getW1Order(qi);
+    return b.map(function(wi){return ord[wi];}).join(' ').toLowerCase().trim()===D.w1[qi].ans.toLowerCase().trim();
+  }).length;
+  var w2raw=S.w2sc?S.w2sc.score:null, w3raw=S.w3sc?S.w3sc.score:null;
+  var rT=toflR(r1ok,r2ok,r3ok), wT=toflW(w1ok,S.w2sc,S.w3sc), wFull=!!S.w2sc&&!!S.w3sc, tT=toflTotal(rT,wT);
+  var spinnerSm='<span class="spin" style="width:14px;height:14px;border-width:2px;"></span>';
+
+  // ── Reading review ──
+  var rRev='';
+  if(isETS){
+    // M1 blanks
+    rRev+='<div class="rev-sec"><div class="rev-title">📝 Module 1 — Complete the Words <span style="font-weight:400;font-size:.82em;color:var(--gray);">('+m1r1ok+'/10)</span></div>';
+    rRev+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px;margin-top:12px;">';
+    D.m1.r1.blanks.forEach(function(b,i){
+      var u=S.m1r1ans[i]||'',ok=u.toLowerCase()===b.suffix.toLowerCase();
+      rRev+='<div class="rev-q" style="background:'+(ok?'#e8f5e9':'#ffebee')+';"><div style="font-weight:700;color:'+(ok?'var(--ok)':'var(--err)')+';">'+(i+1)+'. '+escH(b.prefix)+'<strong>'+escH(b.suffix)+'</strong></div>'+revBlank(ok,b.ans,b.prefix,u)+'</div>';
+    });
+    rRev+='</div></div>';
+    // M1 reading
+    rRev+='<div class="rev-sec"><div class="rev-title">📰 Module 1 — Reading <span style="font-weight:400;font-size:.82em;color:var(--gray);">('+m1rok+'/10)</span></div>';
+    D.m1.reading.texts.forEach(function(txt){
+      rRev+='<div style="margin-top:14px;"><div style="font-size:.8em;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--pri);margin-bottom:8px;">'+escH(txt.title)+'</div>';
+      txt.qi.forEach(function(qi){
+        var q=D.m1.reading.qs[qi],sel=S.m1rans[qi],ok=sel===q.ans;
+        rRev+='<div class="rev-q" style="background:'+(ok?'#e8f5e9':'#ffebee')+';margin-bottom:7px;"><div style="font-weight:600;margin-bottom:4px;">'+(qi+1)+'. '+escH(q.q)+'</div>'+revMCQ(ok,q.opts[q.ans],q.opts[sel])+'</div>';
+      });
+      rRev+='</div>';
+    });
+    rRev+='</div>';
+    // M2 blanks
+    rRev+='<div class="rev-sec"><div class="rev-title">📝 Module 2 — Complete the Words <span style="font-weight:400;font-size:.82em;color:var(--gray);">('+m2r1ok+'/10)</span></div>';
+    rRev+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px;margin-top:12px;">';
+    D.m2.r1.blanks.forEach(function(b,i){
+      var u=S.m2r1ans[i]||'',ok=u.toLowerCase()===b.suffix.toLowerCase();
+      rRev+='<div class="rev-q" style="background:'+(ok?'#e8f5e9':'#ffebee')+';"><div style="font-weight:700;color:'+(ok?'var(--ok)':'var(--err)')+';">'+(i+1)+'. '+escH(b.prefix)+'<strong>'+escH(b.suffix)+'</strong></div>'+revBlank(ok,b.ans,b.prefix,u)+'</div>';
+    });
+    rRev+='</div></div>';
+    // M2 reading
+    rRev+='<div class="rev-sec"><div class="rev-title">📰 Module 2 — Reading <span style="font-weight:400;font-size:.82em;color:var(--gray);">('+m2rok+'/10)</span></div>';
+    D.m2.reading.texts.forEach(function(txt){
+      rRev+='<div style="margin-top:14px;"><div style="font-size:.8em;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--pri);margin-bottom:8px;">'+escH(txt.title)+'</div>';
+      txt.qi.forEach(function(qi){
+        var q=D.m2.reading.qs[qi],sel=S.m2rans[qi],ok=sel===q.ans;
+        rRev+='<div class="rev-q" style="background:'+(ok?'#e8f5e9':'#ffebee')+';margin-bottom:7px;"><div style="font-weight:600;margin-bottom:4px;">'+(qi+1)+'. '+escH(q.q)+'</div>'+revMCQ(ok,q.opts[q.ans],q.opts[sel])+'</div>';
+      });
+      rRev+='</div>';
+    });
+    rRev+='</div>';
+  } else {
+    // Legacy r1 review
+    rRev+='<div class="rev-sec"><div class="rev-title">📝 Reading Part 1 — Complete the Words <span style="font-weight:400;font-size:.82em;color:var(--gray);">('+r1ok+'/10)</span></div>';
+    rRev+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px;margin-top:12px;">';
+    D.r1.blanks.forEach(function(b,i){
+      var u=S.r1ans[i]||'',ok=u.toLowerCase().trim()===b.suffix.toLowerCase();
+      rRev+='<div class="rev-q" style="background:'+(ok?'#e8f5e9':'#ffebee')+';"><div style="font-weight:700;color:'+(ok?'var(--ok)':'var(--err)')+';">'+(i+1)+'. '+escH(b.prefix)+'<strong>'+escH(b.suffix)+'</strong></div>'+revBlank(ok,b.ans,b.prefix,u)+'</div>';
+    });
+    rRev+='</div></div>';
+    // Legacy r2 review
+    rRev+='<div class="rev-sec"><div class="rev-title">📰 Reading Part 2 — Reading in Daily Life <span style="font-weight:400;font-size:.82em;color:var(--gray);">('+r2ok+'/15)</span></div>';
+    D.r2.texts.forEach(function(txt){
+      rRev+='<div style="margin-top:14px;"><div style="font-size:.8em;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--pri);margin-bottom:8px;">'+escH(txt.title)+'</div>';
+      txt.qi.forEach(function(qi){
+        var q=D.r2.qs[qi],sel=S.r2ans[qi],ok=sel===q.ans;
+        rRev+='<div class="rev-q" style="background:'+(ok?'#e8f5e9':'#ffebee')+';margin-bottom:7px;"><div style="font-weight:600;margin-bottom:4px;">'+(qi+1)+'. '+escH(q.q)+'</div>'+revMCQ(ok,q.opts[q.ans],q.opts[sel])+'</div>';
+      });
+      rRev+='</div>';
+    });
+    rRev+='</div>';
+    // Legacy r3 review
+    rRev+='<div class="rev-sec"><div class="rev-title">🎓 Reading Part 3 — Academic Passages <span style="font-weight:400;font-size:.82em;color:var(--gray);">('+r3ok+'/15)</span></div>';
+    D.r3.passages.forEach(function(p){
+      rRev+='<div style="margin-top:14px;"><div style="font-size:.8em;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--pri);margin-bottom:8px;">'+escH(p.title)+'</div>';
+      p.qi.forEach(function(qi){
+        var q=D.r3.qs[qi],sel=S.r3ans[qi],ok=sel===q.ans;
+        rRev+='<div class="rev-q" style="background:'+(ok?'#e8f5e9':'#ffebee')+';margin-bottom:7px;"><div style="font-weight:600;margin-bottom:4px;">'+(qi+1)+'. '+escH(q.q)+'</div>'+revMCQ(ok,q.opts[q.ans],q.opts[sel])+'</div>';
+      });
+      rRev+='</div>';
+    });
+    rRev+='</div>';
+  }
+
+  // ── W1 review ──
+  var w1Rev='<div class="rev-sec"><div class="rev-title">🔤 Writing Part 1 — Build a Sentence <span style="font-weight:400;font-size:.82em;color:var(--gray);">('+w1ok+'/10)</span></div>';
+  D.w1.forEach(function(q,qi){
+    var ord=getW1Order(qi);
+    var sentence=S.w1built[qi].map(function(wi){return ord[wi];}).join(' ');
+    var ok=sentence.toLowerCase().trim()===q.ans.toLowerCase().trim();
+    var prefix=q.prefix||'',suffix=q.suffix||'';
+    var sep=prefix?' ':'';
+    var fullAns=prefix+sep+q.ans+suffix;
+    w1Rev+='<div class="rev-q" style="background:'+(ok?'#e8f5e9':'#ffebee')+';margin-top:8px;">';
+    w1Rev+='<div style="font-weight:600;font-size:.9em;margin-bottom:4px;">'+(qi+1)+'. &ldquo;'+escH(q.ctx)+'&rdquo;</div>';
+    var displaySentence=prefix?(prefix+' '+sentence+suffix):sentence;
+    w1Rev+=revSent(ok,fullAns,displaySentence||'(no answer)');
+    w1Rev+='</div>';
+  });
+  w1Rev+='</div>';
+
+  // ── Writing AI scores ──
+  var w2disp=S.w2ld?'…':w2raw!==null?w2raw+'/5':'—';
+  var w3disp=S.w3ld?'…':w3raw!==null?w3raw+'/5':'—';
+  var wRev='<div class="rev-sec"><div class="rev-title">✍️ Writing — Your Responses &amp; AI Scores</div>';
+  wRev+='<div style="margin-top:16px;">';
+  wRev+='<div style="font-weight:700;font-size:.92em;color:var(--pri);margin-bottom:8px;">Part 2 — Email Writing <span style="font-weight:400;font-size:.85em;color:var(--gray);">'+(w2raw!==null?w2raw+'/5':'Scoring…')+'</span></div>';
+  wRev+='<div style="background:#f9f5f0;border-radius:8px;padding:14px;font-size:.88em;white-space:pre-wrap;line-height:1.85;border:1px solid var(--border);margin-bottom:10px;">'+escH(S.w2ans||'(no response written)')+'</div>';
+  wRev+=wScoreBlock(S.w2ld,S.w2sc,S.w2er);
+  wRev+='</div>';
+  wRev+='<div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border);">';
+  wRev+='<div style="font-weight:700;font-size:.92em;color:var(--pri);margin-bottom:8px;">Part 3 — Academic Discussion <span style="font-weight:400;font-size:.85em;color:var(--gray);">'+(w3raw!==null?w3raw+'/5':'Scoring…')+'</span></div>';
+  wRev+='<div style="background:#f9f5f0;border-radius:8px;padding:14px;font-size:.88em;white-space:pre-wrap;line-height:1.85;border:1px solid var(--border);margin-bottom:10px;">'+escH(S.w3ans||'(no response written)')+'</div>';
+  wRev+=wScoreBlock(S.w3ld,S.w3sc,S.w3er);
+  wRev+='</div></div>';
+
+  // ── Score cards ──
+  function sCard(label,score,isReady,parts){
+    var col=isReady?scoreColor(score):'var(--gray)';
+    var scoreDisp=isReady?'<span style="font-size:2.6em;font-weight:900;color:'+col+';">'+fmtScore(score)+'</span><span style="font-size:1em;color:var(--gray);font-weight:400;"> / 6</span>':spinnerSm;
+    var partsHTML='';
+    parts.forEach(function(p){
+      partsHTML+='<div style="display:flex;justify-content:space-between;font-size:.82em;padding:3px 0;border-bottom:1px solid var(--border);"><span style="color:var(--gray);">'+p.l+'</span><span style="font-weight:700;color:'+(p.s/p.t>=.7?'var(--ok)':p.s/p.t>=.5?'var(--pri)':'var(--err)')+';">'+p.s+' / '+p.t+'</span></div>';
+    });
+    return '<div class="res-item" style="text-align:left;padding:16px 18px;"><div style="font-size:.72em;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:6px;">'+label+'</div><div style="margin-bottom:12px;">'+scoreDisp+'</div>'+partsHTML+'</div>';
+  }
+
+  var rParts=isETS
+    ?[{l:'Module 1 — Complete the Words',s:m1r1ok,t:10},{l:'Module 1 — Reading',s:m1rok,t:10},{l:'Module 2 — Complete the Words',s:m2r1ok,t:10},{l:'Module 2 — Reading',s:m2rok,t:10}]
+    :[{l:'Part 1 — Complete the Words',s:r1ok,t:10},{l:'Part 2 — Reading in Daily Life',s:r2ok,t:15},{l:'Part 3 — Academic Passages',s:r3ok,t:15}];
+  var rCard=sCard('📖 Reading',rT,true,rParts);
+
+  var w2disp2=S.w2ld?'…':w2raw!==null?w2raw+'/5':'—';
+  var w3disp2=S.w3ld?'…':w3raw!==null?w3raw+'/5':'—';
+  var wCardManual='<div class="res-item" style="text-align:left;padding:16px 18px;">'
+    +'<div style="font-size:.72em;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:6px;">✍️ Writing</div>'
+    +'<div style="margin-bottom:12px;">'+(wFull?'<span style="font-size:2.6em;font-weight:900;color:'+scoreColor(wT)+';">'+fmtScore(wT)+'</span><span style="font-size:1em;color:var(--gray);font-weight:400;"> / 6</span>':spinnerSm+'<span style="font-size:.82em;color:var(--gray);margin-left:8px;">Calculating…</span>')+'</div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:.82em;padding:3px 0;border-bottom:1px solid var(--border);"><span style="color:var(--gray);">Part 1 — Build a Sentence</span><span style="font-weight:700;color:'+(w1ok/10>=.7?'var(--ok)':w1ok/10>=.5?'var(--pri)':'var(--err)')+';">'+w1ok+' / 10</span></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:.82em;padding:3px 0;border-bottom:1px solid var(--border);"><span style="color:var(--gray);">Part 2 — Email Writing (AI)</span><span style="font-weight:700;color:var(--gray);">'+w2disp2+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:.82em;padding:3px 0;border-bottom:1px solid var(--border);"><span style="color:var(--gray);">Part 3 — Academic Discussion (AI)</span><span style="font-weight:700;color:var(--gray);">'+w3disp2+'</span></div>'
+    +'</div>';
+
+  var totalDisp=wFull
+    ?'<span style="font-size:3.2em;font-weight:900;color:'+scoreColor(tT)+';">'+fmtScore(tT)+'</span><span style="font-size:1.1em;color:var(--gray);font-weight:400;"> / 6</span>'
+    :spinnerSm+'<span style="font-size:.88em;color:var(--gray);margin-left:10px;">Waiting for writing scores…</span>';
+
+  app().innerHTML=
+    '<div style="padding:20px 0 50px;">'
+    +'<div class="res-total">'
+    +'<div style="font-size:.82em;color:var(--gray);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">TOEFL Practice Test '+_tn+' &middot; Score Report</div>'
+    +'<div style="font-size:.72em;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:4px;">Total Score</div>'
+    +'<div style="margin-bottom:4px;">'+totalDisp+'</div>'
+    +'<div style="font-size:.8em;color:var(--gray);margin-top:2px;">(Reading + Writing average, converted to TOEFL 0–6 scale)</div>'
+    +'</div>'
+    +'<div class="res-grid" style="margin-bottom:22px;">'+rCard+wCardManual+'</div>'
+    +'<div style="text-align:center;margin-bottom:28px;"><button class="btn btn-pri" style="font-size:.9em;padding:10px 28px;" onclick="location.reload()">&#8635; Start a New Test</button></div>'
+    +'<div style="font-size:.82em;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:12px;">Answer Review</div>'
+    +rRev+w1Rev+wRev
+    +'</div>';
+}
+
+// ===== ESCAPE HTML =====
+function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ===== INTRO =====
+function renderIntro(){
+  var rInfo=isETS?'40 questions<br>24 minutes':'40 questions<br>20 minutes';
+  var structHTML='';
+  if(isETS){
+    structHTML=
+      '<div>📝 Module 1 &nbsp;— Complete the Words + Reading <span style="float:right;">20 Q · 12 min</span></div>'
+     +'<div>📝 Module 2 &nbsp;— Complete the Words + Reading <span style="float:right;">20 Q · 12 min</span></div>'
+     +'<div style="font-size:.8em;color:var(--acc);margin:2px 0 8px;">⚠️ Cannot return to Module 1 once Module 2 begins</div>'
+     +'<div>🔤 Writing Part 1 — Build a Sentence <span style="float:right;">10 Q · 5 min</span></div>'
+     +'<div>📧 Writing Part 2 — Email Writing <span style="float:right;">1 Task · 7 min</span></div>'
+     +'<div>💬 Writing Part 3 — Academic Discussion <span style="float:right;">1 Task · 10 min</span></div>';
+  } else {
+    structHTML=
+      '<div>📝 Reading Part 1 &nbsp;— Complete the Words <span style="float:right;">10 Q</span></div>'
+     +'<div>📰 Reading Part 2 &nbsp;— Reading in Daily Life <span style="float:right;">15 Q</span></div>'
+     +'<div>🎓 Reading Part 3 &nbsp;— Academic Passages <span style="float:right;">15 Q</span></div>'
+     +'<div>🔤 Writing Part 1 &nbsp;&nbsp;— Build a Sentence <span style="float:right;">10 Q</span></div>'
+     +'<div>📧 Writing Part 2 &nbsp;&nbsp;— Email Writing <span style="float:right;">1 Task</span></div>'
+     +'<div>💬 Writing Part 3 &nbsp;&nbsp;— Academic Discussion <span style="float:right;">1 Task</span></div>';
+  }
+  app().innerHTML=`
+    <div class="intro">
+      <div style="font-size:3.2em;margin-bottom:6px;">📝</div>
+      <div class="ititle">TOEFL iBT</div>
+      <div style="font-size:1.4em;font-weight:800;color:var(--acc);margin-bottom:2px;">Practice Test <span id="test-num-intro"></span></div>
+      <div style="font-size:.95em;color:var(--gray);margin-bottom:24px;">2026 Edition</div>
+      <div class="iinfo">
+        <div class="icard"><h3>📖 Reading</h3><p>${rInfo}</p></div>
+        <div class="icard"><h3>✍️ Writing</h3><p>12 questions<br>23 minutes</p></div>
+      </div>
+      <div class="struct">
+        <div style="font-weight:700;margin-bottom:10px;color:var(--txt);">Test Structure</div>
+        <div style="font-size:.88em;color:var(--gray);line-height:2.1;">${structHTML}</div>
+      </div>
+      <button class="btn btn-pri" style="font-size:1.08em;padding:14px 44px;" onclick="goReading()">Start Test →</button>
+    </div>`;
+}
+
+// ===== INIT =====
+const _tn=(D.meta&&D.meta.testNumber)?D.meta.testNumber:'';
+document.title='TOEFL iBT Practice Test '+_tn;
+renderIntro();
+var _el=document.getElementById('test-num-intro');
+if(_el)_el.textContent=_tn;
+</script>
+</body>
+</html>
