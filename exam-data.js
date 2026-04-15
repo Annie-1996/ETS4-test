@@ -242,5 +242,183 @@ window.EXAM_DATA = {
     inst:  "Express and support your opinion on whether digital media has had a beneficial or negative effect on traditional forms of communication. Your response should be between 100 and 150 words.",
     range: [100, 150],
     rubric: "Student contributing to a discussion on whether digital media has had a beneficial or negative effect on traditional forms of communication."
+  },
+
+  // ── LISTENING ────────────────────────────────────────────────────────────────
+  l1: {
+    sections: [
+      {
+        type: 'listenResponse',
+        title: 'Choose the Best Response',
+        qStart: 0,
+        audios: [
+          'audio/Listening/Listen and Response/Listening1_Listen_Response_Question1.ogg',
+          'audio/Listening/Listen and Response/Listening1_Listen_Response_Question2.ogg',
+          'audio/Listening/Listen and Response/Listening1_Listen_Response_Question3.ogg',
+          'audio/Listening/Listen and Response/Listening1_Listen_Response_Question4.ogg',
+          'audio/Listening/Listen and Response/Listening1_Listen_Response_Question5.ogg',
+          'audio/Listening/Listen and Response/Listening1_Listen_Response_Question6.ogg',
+          'audio/Listening/Listen and Response/Listening1_Listen_Response_Question7.ogg',
+          'audio/Listening/Listen and Response/Listening1_Listen_Response_Question8.ogg'
+        ],
+        qs: [
+          { prompt: "Man: Is the library open now?", opts: ["Yes, until nine p.m.", "Maybe last week.", "Every book.", "No, dinner is at eight p.m."], ans: 0 },
+          { prompt: "Woman: Could you help me organize these files?", opts: ["Sure, I can.", "The calendar is current.", "Yes, on the left.", "The kitchen is large."], ans: 0 },
+          { prompt: "Man: It looks like you didn't finish the slides for the presentation.", opts: ["Yes, I agree with the manager.", "The concert was fantastic.", "Sorry—I forgot.", "Yes, I'll leave tomorrow evening."], ans: 2 },
+          { prompt: "Woman: It's quite warm, isn't it?", opts: ["I haven't had a chance to check the schedule.", "It's not in the budget for this year.", "The hallway lights are out again.", "Especially for this time of year."], ans: 3 },
+          { prompt: "Man: Will you be able to meet the deadline for your research paper?", opts: ["Sure, I'll call them tomorrow.", "Sorry to hear that.", "I'm on track to finish on time.", "Not such a good idea."], ans: 2 },
+          { prompt: "Woman: When is your job interview?", opts: ["It will be in the conference room.", "It's been rescheduled to Monday morning.", "I'll do that next time.", "We went out for lunch afterward."], ans: 1 },
+          { prompt: "Man: I'm having trouble resetting my password.", opts: ["Let me find the instructions for you.", "I can't attend tonight.", "I don't know how many.", "Set the documents on the table."], ans: 0 },
+          { prompt: "Woman: I can't find the invoice for last month's catering order.", opts: ["Did you check the file folder?", "Two copies of the billing statement.", "Didn't they offer to write a review?", "A month from now."], ans: 0 }
+        ]
+      },
+      {
+        type: 'conversation',
+        title: 'Short Conversation',
+        qStart: 8,
+        dirAudio: 'audio/Listening/Short Conversation/Listening1_Conversation_Directions_9-10.ogg',
+        qAudio:   'audio/Listening/Short Conversation/Listening1_Conversation_Questions_9-10.ogg',
+        script: "Man: I've been having trouble with my car lately. It makes a weird sound every time I start it.\n\nWoman: That's annoying. Have you taken it to get checked out?\n\nMan: Not yet. I'm planning to go tomorrow.\n\nWoman: That's a good idea. It might be something minor, but it's better to be safe.\n\nMan: Exactly. I just pray it doesn't cost me an arm and a leg. And I hope to get my car back by Sunday. I need to pick up my mother at the airport then.\n\nWoman: Fingers crossed!",
+        qs: [
+          { q: "What problem is the man having with his car?", opts: ["It cannot start.", "It makes a strange noise.", "It is unable to move fast.", "It is unsafe to drive."], ans: 1 },
+          { q: "What does the man imply at the end of the conversation?", opts: ["He wants to buy a new car.", "He needs his car for an important errand he must do.", "He needs advice about a mechanic to use.", "He hopes an issue is minor."], ans: 3 }
+        ]
+      },
+      {
+        type: 'conversation',
+        title: 'Short Conversation',
+        qStart: 10,
+        dirAudio: 'audio/Listening/Short Conversation/Listening1_Conversation_Directions_11-12.ogg',
+        qAudio:   'audio/Listening/Short Conversation/Listening1_Conversation_Questions_11-12.ogg',
+        script: "Woman: I heard you're planning a trip to Sky-High Ski Resort this winter. Have you booked everything yet?\n\nMan: Well, I've booked the cabin to stay, but I still need to reserve skis and ski boots.\n\nWoman: You don't have your own?\n\nMan: No, this will actually be my first time skiing. I'm a bit nervous.\n\nWoman: You'll do fine. By the way, there's a great Thai restaurant next to the resort, and I don't think it requires reservations.\n\nMan: Great! What's the name?\n\nWoman: Can't remember off the top of my head. Lemme look it up on my phone.",
+        qs: [
+          { q: "What does the man still need to book?", opts: ["Transportation", "A restaurant table", "A cabin", "Skiing equipment"], ans: 3 },
+          { q: "What will the woman do next?", opts: ["Look up a recipe", "Check the name of a restaurant", "Offer the man some skiing advice", "Make a phone call"], ans: 1 }
+        ]
+      },
+      {
+        type: 'announcement',
+        title: 'Announcement',
+        qStart: 12,
+        dirAudio: 'audio/Listening/Announcements/Listening1_Announcement_Directions_13-14.ogg',
+        qAudio:   'audio/Listening/Announcements/Listening1_Announcement_Questions_13-14.ogg',
+        script: "Woman: I want to let everyone know that my office hours will be changing. Starting next week, I will be available on Mondays and Wednesdays from 2 to 4 p.m., instead of the current 1 to 3 p.m. If you have an urgent need to meet with me and these times don't work for you, please email me and I can schedule an appointment. Keep in mind that office hours are a great opportunity to discuss any questions or concerns you have about the course material.",
+        qs: [
+          { q: "What is the main topic of the announcement?", opts: ["A revision to a schedule", "The process for making an appointment", "Updates to course material", "An upcoming exam"], ans: 0 },
+          { q: "What does the professor encourage students to do?", opts: ["Form study groups with classmates", "Begin planning their schedule for next semester", "Meet with her if they have questions", "Email her a list of their concerns"], ans: 2 }
+        ]
+      },
+      {
+        type: 'academicTalk',
+        title: 'Academic Talk',
+        subject: 'Neuroscience',
+        qStart: 14,
+        dirAudio: 'audio/Listening/Academic Talk/Listening1_Academic_Talk_Directions_15-18.ogg',
+        qAudio:   'audio/Listening/Academic Talk/Listening1_Academic_Talk_Questions_15-18.ogg',
+        script: "Man: Let's talk a little about language acquisition, which is the process by which humans learn to understand and use language. There are two main types of language acquisition: first language acquisition and second language acquisition. First language acquisition occurs naturally and with relative ease during early childhood, through interaction with family and the surrounding environment. Children are able to pick up their native language quickly due to their innate linguistic capabilities, a concept supported by the linguist Noam Chomsky's theory of Universal Grammar.\n\nUniversal Grammar suggests that the ability to acquire language is innate to humans and that all human languages share a common underlying structure. Second language acquisition, on the other hand, often requires more conscious effort and formal education and typically happens later in life. Several factors influence the ease and success of second language acquisition, including exposure to the language, age, and motivation. Motivation, in particular, plays a crucial role—highly motivated individuals are more likely to engage actively with the language and persist in their learning efforts.\n\nAge is also significant; according to the critical period hypothesis, there is an optimal window in early childhood during which language acquisition occurs most easily. After this period, acquiring a new language can be more challenging. Understanding these processes helps educators and linguists develop effective teaching methods and language learning tools.",
+        qs: [
+          { q: "How is the talk mainly organized?", opts: ["It contrasts children's innate linguistic capabilities with those of adults.", "It lists the principles of Noam Chomsky's theory of Universal Grammar.", "It describes the differences between two methods of teaching language.", "It discusses the two main types of language acquisition."], ans: 3 },
+          { q: "Why does the speaker mention Noam Chomsky's theory of Universal Grammar?", opts: ["To highlight the importance of formal education in language learning", "To explain why children are able to pick up their native language quickly", "To describe how some languages are more complex than others", "To provide background on the critical period hypothesis"], ans: 1 },
+          { q: "What does the speaker say about motivation and language acquisition?", opts: ["Higher motivation makes it easier for a person to acquire a second language.", "Motivation becomes less important to language acquisition as a person ages.", "Children with increased exposure to a second language are more motivated to learn it.", "Formal education does not motivate people to acquire a second language."], ans: 0 },
+          { q: "According to the speaker, what is suggested by the critical period hypothesis?", opts: ["People with innate linguistic capabilities acquire language easily.", "There is an optimal window in early childhood for language acquisition.", "A longer period of language exposure supports better learning.", "Second language acquisition occurs most easily in early adulthood."], ans: 1 }
+        ]
+      }
+    ]
+  },
+
+  l2: {
+    sections: [
+      {
+        type: 'listenResponse',
+        title: 'Choose the Best Response',
+        qStart: 0,
+        audios: [
+          'audio/Listening/Listen and Response/Listening2_Listen_Response_Question1.ogg',
+          'audio/Listening/Listen and Response/Listening2_Listen_Response_Question2.ogg',
+          'audio/Listening/Listen and Response/Listening2_Listen_Response_Question3.ogg',
+          'audio/Listening/Listen and Response/Listening2_Listen_Response_Question4.ogg',
+          'audio/Listening/Listen and Response/Listening2_Listen_Response_Question5.ogg',
+          'audio/Listening/Listen and Response/Listening2_Listen_Response_Question6.ogg',
+          'audio/Listening/Listen and Response/Listening2_Listen_Response_Question7.ogg',
+          'audio/Listening/Listen and Response/Listening2_Listen_Response_Question8.ogg'
+        ],
+        qs: [
+          { prompt: "Man: Would you mind closing the window?", opts: ["Sure, I'll call tomorrow.", "Check under the table.", "No problem.", "Closed on Mondays."], ans: 2 },
+          { prompt: "Woman: The seminar meets at eight thirty a.m. on Wednesdays.", opts: ["Nearly 90 minutes.", "Thank you for reminding me.", "The bookstore opens at noon on Sundays.", "About 200 faculty members."], ans: 1 },
+          { prompt: "Man: Have you created the syllabus for the art history course?", opts: ["Sure, I'll check them.", "No, the artwork is being shipped.", "I'll have time tomorrow morning.", "The professor called me back."], ans: 2 },
+          { prompt: "Woman: Where can I find the cafeteria?", opts: ["On the ground floor.", "A bigger lobby.", "Usually at eleven thirty a.m.", "Good meal selections."], ans: 0 },
+          { prompt: "Man: Who will summarize our team's research findings?", opts: ["Jacob already found his.", "No more than 1,000 words.", "Emily would do a great job.", "Different lab equipment."], ans: 2 },
+          { prompt: "Woman: How do you use this software?", opts: ["Follow the tutorial.", "Purchase a computer.", "A soft touch is needed.", "Thursday afternoons."], ans: 0 },
+          { prompt: "Man: Is the café open now?", opts: ["Around back.", "Coffee and tea.", "It's closed.", "She is available."], ans: 2 },
+          { prompt: "Man: Let's schedule an extra study-group meeting.", opts: ["Doesn't the librarian know?", "Longer than expected.", "I ordered a subscription yesterday.", "For Thursday evening?"], ans: 3 }
+        ]
+      },
+      {
+        type: 'conversation',
+        title: 'Short Conversation',
+        qStart: 8,
+        dirAudio: 'audio/Listening/Short Conversation/Listening2_Conversation_Directions_9-10.ogg',
+        qAudio:   'audio/Listening/Short Conversation/Listening2_Conversation_Questions_9-10.ogg',
+        script: "Man: I've been eyeing the new gym downtown…\n\nWoman: Have you checked their facilities?\n\nMan: Yes, they have modern equipment and offer various classes.\n\nWoman: Are the prices reasonable?\n\nMan: The daily use fees are higher than I expected. So maybe I'll get a long-term membership instead.\n\nWoman: Well, if you think you'll go regularly…\n\nMan: Yeah, the fitness book I'm reading says that's the way to get in shape anyway.",
+        qs: [
+          { q: "What did the man dislike about the new gym?", opts: ["The location", "The facilities", "The equipment", "The prices for one-time use"], ans: 3 },
+          { q: "Why does the man mention a book?", opts: ["To offer a reading suggestion for the woman", "To explain how he found out about the new gym", "To give an extra reason for getting a long-term membership", "To point out that there are many different ways to get in shape"], ans: 2 }
+        ]
+      },
+      {
+        type: 'announcement',
+        title: 'Announcement',
+        qStart: 10,
+        dirAudio: 'audio/Listening/Announcements/Listening2_Announcement_Directions_11-12.ogg',
+        qAudio:   'audio/Listening/Announcements/Listening2_Announcement_Questions_11-12.ogg',
+        script: "Man: Due to some recent changes in university policy, we need everyone to update their contact information in the student portal. Doing so will ensure that you receive important notifications, including about class cancellations and emergency alerts. Please complete the update by the end of this week. Don't take a chance on missing out on critical information.",
+        qs: [
+          { q: "Why does the speaker mention class cancellations and emergency alerts?", opts: ["To inform students about recent policy changes", "To emphasize the importance of updating contact information", "To promote a new program on personal health", "To point out that classes are often canceled because of bad weather"], ans: 1 },
+          { q: "What does the speaker imply when he says, \"Don't take a chance on missing out on critical information\"?", opts: ["Students should make updates quickly.", "Class attendance is mandatory.", "The portal can be difficult to navigate.", "Important information has just been posted."], ans: 0 }
+        ]
+      },
+      {
+        type: 'academicTalk',
+        title: 'Academic Talk',
+        subject: 'Chemistry',
+        qStart: 12,
+        dirAudio: 'audio/Listening/Academic Talk/Listening2_Academic_Talk_Directions_13-16.ogg',
+        qAudio:   'audio/Listening/Academic Talk/Listening2_Academic_Talk_Questions_13-16.ogg',
+        script: "Woman: Today we're discussing the notion of the ecological footprint, something that measures the impact of human activities on the environment, in terms of the amount of natural resources we consume and the waste we generate. The ecological footprint is often expressed in terms of number of global hectares. This number represents the total area of biologically productive land or water needed in order to support human activity.\n\nIt considers various factors, including carbon emissions, food consumption, water usage, and land development. One primary component of the ecological footprint is the carbon footprint, which measures the amount of greenhouse gases emitted due to consumption of fossil fuels like petroleum and coal. High carbon footprints contribute significantly to global warming. Another important aspect is our consumption of natural resources like water and food, which can lead to resource depletion and environmental degradation. The concept of ecological footprint is crucial for understanding and addressing the sustainability of human activities. By measuring our ecological footprint, individuals, companies, and even whole countries can identify areas where they can reduce their impact on the environment. This could include adopting practices like recycling, conserving water, using renewable energy, and reducing waste.",
+        qs: [
+          { q: "What is the main topic of the talk?", opts: ["Replacing fossil fuels with more sustainable energy sources", "A way of measuring the effects of human activities on the environment", "How fossil fuel use leads to global warming", "The importance of water conservation to a sustainable future"], ans: 1 },
+          { q: "According to the speaker, the ecological footprint is expressed in terms of", opts: ["area of land and water needed", "amount of greenhouse gas produced", "global temperature increase", "number of natural resources consumed"], ans: 0 },
+          { q: "What does the speaker say about the carbon footprint?", opts: ["It primarily applies to industrial activities.", "It includes tracking the biodiversity of an ecosystem.", "It is a component of the ecological footprint.", "It considers the number of vehicles in a given area."], ans: 2 },
+          { q: "What is one cause of resource depletion that the speaker mentions?", opts: ["Environmental policies", "Food consumption", "Generation of waste", "Carbon emissions"], ans: 1 }
+        ]
+      }
+    ]
+  },
+
+  // ── SPEAKING ─────────────────────────────────────────────────────────────────
+  sp: {
+    listenRepeat: {
+      context: "You are being trained to assist visitors at a nature reserve. Listen to your trainer and repeat what he says. Repeat only once.",
+      dirAudio: 'audio/Speaking/Listen and Repeat/Speaking_Listen_Repeat_Directions.ogg',
+      items: [
+        { text: "Welcome to our local nature reserve.", audio: 'audio/Speaking/Listen and Repeat/Speaking_Listen_Repeat_1.ogg' },
+        { text: "Take a nature walk on our hiking trails.", audio: 'audio/Speaking/Listen and Repeat/Speaking_Listen_Repeat_2.ogg' },
+        { text: "The picnic area's a perfect place to enjoy your lunch.", audio: 'audio/Speaking/Listen and Repeat/Speaking_Listen_Repeat_3.ogg' },
+        { text: "The visitor center has helpful information for guests.", audio: 'audio/Speaking/Listen and Repeat/Speaking_Listen_Repeat_4.ogg' },
+        { text: "The observation tower offers a great view of the forest.", audio: 'audio/Speaking/Listen and Repeat/Speaking_Listen_Repeat_5.ogg' },
+        { text: "Our restroom facilities are located just beside the entrance.", audio: 'audio/Speaking/Listen and Repeat/Speaking_Listen_Repeat_6.ogg' },
+        { text: "While you're exploring the grounds, please respect all wildlife and follow the posted rules at all times.", audio: 'audio/Speaking/Listen and Repeat/Speaking_Listen_Repeat_7.ogg' }
+      ]
+    },
+    interview: {
+      context: "You have volunteered for a research study about food preferences. You will have a short online interview with a researcher. The researcher will ask you some questions.",
+      dirAudio: 'audio/Speaking/Interview/Speaking_Interview_Directions.ogg',
+      qs: [
+        { q: "In your opinion, what kinds of meals do people your age enjoy most? Are they traditional, modern, or something in between?", audio: 'audio/Speaking/Interview/Speaking_Interview_1.mp4' },
+        { q: "What kind of meals do you usually have on busy days—do you cook, eat out, or pick up something ready-made?", audio: 'audio/Speaking/Interview/Speaking_Interview_2.mp4' },
+        { q: "Many people say that modern life has changed how we eat. Do you think people today have healthier eating habits than in the past? Why or why not?", audio: 'audio/Speaking/Interview/Speaking_Interview_3.mp4' },
+        { q: "Some people believe that preparing traditional meals at home is an important way to stay connected to one's culture. Do you agree, or do you think it's possible to connect with culture in other ways? Why?", audio: 'audio/Speaking/Interview/Speaking_Interview_4.mp4' }
+      ]
+    }
   }
 };

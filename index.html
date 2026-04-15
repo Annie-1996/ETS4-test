@@ -189,7 +189,14 @@ const S = {
   w1Time:5*60, w2Time:7*60, w3Time:10*60,
   w1Exp:false, w2Exp:false, w3Exp:false,
   tInt:null, done:false,
-  w2sc:null, w3sc:null, w2ld:false, w3ld:false, w2er:null, w3er:null
+  w2sc:null, w3sc:null, w2ld:false, w3ld:false, w2er:null, w3er:null,
+  // Listening
+  lModule:1, lSecIdx:0, lQIdx:0,
+  l1ans:Array(18).fill(null), l2ans:Array(16).fill(null),
+  l1Time:10*60, l2Time:10*60, l1Exp:false, l2Exp:false,
+  // Speaking
+  spPart:1, spQIdx:0,
+  spTime:15*60, spExp:false
 };
 
 // ===== W1 ORDERS =====
@@ -217,17 +224,20 @@ function startTimer(mode){
     else if(!S[expKey]){
       S[expKey]=true;
       if(m==='m1') goModule2();
-      else if(m==='m2') goWriting();
-      else if(m==='r') goWriting();
+      else if(m==='m2') goListening();
+      else if(m==='r') goListening();
+      else if(m==='l1') goListeningM2();
+      else if(m==='l2') goWriting();
       else if(m==='w1') nextWPart();
       else if(m==='w2') nextWPart();
-      else if(m==='w3') goResults();
+      else if(m==='w3') goSpeaking();
+      else if(m==='sp') goResults();
     }
   },1000);
 }
 function updTimer(){
   const m=S.timerMode||'r';
-  const t=m==='m1'?S.m1Time:m==='m2'?S.m2Time:m==='r'?S.rTime:m==='w1'?S.w1Time:m==='w2'?S.w2Time:S.w3Time;
+  const t=m==='m1'?S.m1Time:m==='m2'?S.m2Time:m==='r'?S.rTime:m==='l1'?S.l1Time:m==='l2'?S.l2Time:m==='sp'?S.spTime:m==='w1'?S.w1Time:m==='w2'?S.w2Time:S.w3Time;
   const el=$('tdisp');if(!el)return;
   el.textContent=fmt(t);
   el.className='tdisp'+(t<300?' warn':'');
@@ -255,6 +265,26 @@ function goWriting(){
   stopTimer();S.screen='w';S.wPart=1;S.wQIdx=0;
   $('tup').style.display='none';$('slbl').textContent='Writing Section';
   startTimer('w1');renderWriting();
+}
+function goListening(){
+  stopTimer();$('tup').style.display='none';
+  S.screen='l';S.lModule=1;S.lSecIdx=0;S.lQIdx=0;
+  $('slbl').textContent='Listening Section';
+  $('plbl').textContent='Module 1 of 2';
+  startTimer('l1');renderListening();
+}
+function goListeningM2(){
+  stopTimer();$('tup').style.display='none';
+  S.lModule=2;S.lSecIdx=0;S.lQIdx=0;
+  $('plbl').textContent='Module 2 of 2';
+  startTimer('l2');renderListening();
+}
+function goSpeaking(){
+  stopTimer();S.screen='sp';S.spPart=1;S.spQIdx=0;
+  $('tup').style.display='none';
+  $('slbl').textContent='Speaking Section';
+  $('plbl').textContent='Part 1 — Listen and Repeat';
+  startTimer('sp');renderSpeaking();
 }
 function goResults(){
   stopTimer();S.screen='res';S.done=true;
@@ -382,7 +412,7 @@ function renderReadingPanel(){
     ?`<button class="btn btn-acc" onclick="nextText()">Next Text →</button>`
     :S.module===1
       ?`<button class="btn btn-acc" onclick="goModule2()">Start Module 2 →</button>`
-      :`<button class="btn btn-acc" onclick="goWriting()">Start Writing →</button>`;
+      :`<button class="btn btn-acc" onclick="goListening()">Start Listening →</button>`;
   app().innerHTML=`
     <div class="ph"><div class="pt">Module ${S.module} — Reading</div><div class="ps">Text ${S.tIdx+1} of ${texts.length} · ${txt.tag}</div></div>
     <div class="pnav">${dotRow}<span style="font-size:.82em;color:var(--gray);">Text ${S.tIdx+1}/${texts.length}: ${escH(txt.title)}</span></div>
@@ -683,7 +713,7 @@ function renderW3(){
     ${scHTML}
     <div class="nav">
       <button class="btn btn-gray" onclick="prevWPart()">← Previous Part</button>
-      <div class="nav-r"><button class="btn btn-acc" onclick="goResults()">Finish &amp; See Results →</button></div>
+      <div class="nav-r"><button class="btn btn-acc" onclick="goSpeaking()">Next: Speaking →</button></div>
     </div>`;
 }
 async function scoreW3(){
@@ -696,6 +726,155 @@ async function scoreW3(){
   }catch(e){S.w3er='Scoring error: '+e.message;}
   S.w3ld=false;renderW3();
 }
+
+// ===== AUDIO HELPER =====
+function mkAudio(src,btnId){
+  if(!src)return'';
+  return`<div style="display:flex;align-items:center;gap:10px;margin:10px 0;"><audio id="${btnId}_aud" src="${src}" preload="none"></audio><button id="${btnId}_btn" onclick="toggleAudio('${btnId}_aud','${btnId}_btn')" class="btn btn-gray" style="font-size:.85em;padding:7px 16px;">▶ Play</button><span style="font-size:.8em;color:var(--gray);">click to play audio</span></div>`;
+}
+function toggleAudio(audId,btnId){
+  var a=$(audId),b=$(btnId);if(!a)return;
+  if(a.paused){a.play();if(b)b.textContent='⏸ Pause';}
+  else{a.pause();if(b)b.textContent='▶ Play';}
+  a.onended=function(){if(b)b.textContent='▶ Play';};
+}
+
+// ===== LISTENING =====
+function renderListening(){
+  $('slbl').textContent='Listening Section';
+  $('plbl').textContent='Module '+S.lModule+' of 2';
+  const mod=S.lModule===1?D.l1:D.l2;
+  const sec=mod.sections[S.lSecIdx];
+  if(sec.type==='listenResponse')renderListeningLR(sec);
+  else renderListeningPanel(sec);
+}
+function renderListeningLR(sec){
+  const qi=S.lQIdx,q=sec.qs[qi],globalIdx=sec.qStart+qi;
+  const lans=S.lModule===1?S.l1ans:S.l2ans;
+  const sel=lans[globalIdx];
+  const mod=S.lModule===1?D.l1:D.l2;
+  const totalQs=mod.sections.reduce(function(a,s){return a+s.qs.length;},0);
+  let optsHTML='';
+  q.opts.forEach(function(o,oi){
+    let cls='opt';
+    if(S.done){cls+=oi===q.ans?' cor':(sel===oi?' wrong':'');}else if(sel===oi)cls+=' sel';
+    optsHTML+=`<div class="${cls}" onclick="selListeningMCQ(${globalIdx},${oi})"><span class="opt-lt">${'ABCD'[oi]}</span><span class="akshar">${escH(o)}</span></div>`;
+  });
+  const isLastQ=qi===sec.qs.length-1;
+  const isLastSec=S.lSecIdx===mod.sections.length-1;
+  const nextFn=isLastQ?(isLastSec?(S.lModule===1?'goListeningM2()':'goWriting()'):'nextListeningSection()'):'nextListeningLRQ()';
+  const nextLbl=isLastQ&&isLastSec?(S.lModule===1?'Start Module 2 →':'Start Writing →'):'Next →';
+  app().innerHTML=`
+    <div class="ph"><div class="pt">Module ${S.lModule} — Choose the Best Response</div><div class="ps">Question ${globalIdx+1} of ${totalQs}</div></div>
+    <div class="card">
+      <div style="font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:10px;">Listen and Choose a Response</div>
+      ${mkAudio(sec.audios[qi],'lr_'+S.lModule+'_'+qi)}
+      <div class="akshar" style="font-size:1em;margin:16px 0 20px;padding:14px;background:#f5f0eb;border-radius:8px;border-left:3px solid var(--pri);">${escH(q.prompt)}</div>
+      ${optsHTML}
+    </div>
+    <div class="nav">
+      ${qi>0?`<button class="btn btn-gray" onclick="prevListeningLRQ()">← Previous</button>`:'<div></div>'}
+      <button class="btn btn-acc" onclick="${nextFn}">${nextLbl}</button>
+    </div>`;
+}
+function renderListeningPanel(sec){
+  const mod=S.lModule===1?D.l1:D.l2;
+  const lans=S.lModule===1?S.l1ans:S.l2ans;
+  const totalQs=mod.sections.reduce(function(a,s){return a+s.qs.length;},0);
+  let qhtml='';
+  sec.qs.forEach(function(q,j){
+    const gi=sec.qStart+j,sel=lans[gi];
+    qhtml+=`<div class="qcard"><div class="qtxt">${gi+1}. ${escH(q.q)}</div>`;
+    q.opts.forEach(function(o,oi){
+      let cls='opt';
+      if(S.done){cls+=oi===q.ans?' cor':(sel===oi?' wrong':'');}else if(sel===oi)cls+=' sel';
+      qhtml+=`<div class="${cls}" onclick="selListeningMCQ(${gi},${oi})"><span class="opt-lt">${'ABCD'[oi]}</span><span class="akshar">${escH(o)}</span></div>`;
+    });
+    if(S.done&&lans[gi]!==q.ans)qhtml+=`<div class="ans-hint">✓ ${escH(q.opts[q.ans])}</div>`;
+    qhtml+='</div>';
+  });
+  const isLast=S.lSecIdx===mod.sections.length-1;
+  const nextBtn=isLast
+    ?(S.lModule===1?`<button class="btn btn-acc" onclick="goListeningM2()">Start Module 2 →</button>`:`<button class="btn btn-acc" onclick="goWriting()">Start Writing →</button>`)
+    :`<button class="btn btn-acc" onclick="nextListeningSection()">Next →</button>`;
+  const typeLabel=sec.type==='conversation'?'Short Conversation':sec.type==='announcement'?'Announcement':'Academic Talk';
+  const subLabel=sec.subject?sec.subject+' · ':'';
+  app().innerHTML=`
+    <div class="ph"><div class="pt">Module ${S.lModule} — ${escH(typeLabel)}</div><div class="ps">${subLabel}Questions ${sec.qStart+1}–${sec.qStart+sec.qs.length} of ${totalQs}</div></div>
+    <div class="split">
+      <div class="left-panel">
+        <div style="font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--pri);margin-bottom:6px;">${escH(typeLabel)}</div>
+        ${mkAudio(sec.qAudio,'sec_'+S.lModule+'_'+S.lSecIdx)}
+        <div class="akshar" style="white-space:pre-line;font-size:.9em;line-height:1.85;margin-top:10px;">${escH(sec.script)}</div>
+      </div>
+      <div class="right-panel">${qhtml}</div>
+    </div>
+    <div class="nav"><div></div>${nextBtn}</div>`;
+}
+function selListeningMCQ(gi,oi){
+  if(S.done)return;
+  var rp=document.querySelector('.right-panel');var st=rp?rp.scrollTop:0;
+  if(S.lModule===1)S.l1ans[gi]=oi;else S.l2ans[gi]=oi;
+  const sec=(S.lModule===1?D.l1:D.l2).sections[S.lSecIdx];
+  if(sec.type==='listenResponse')renderListeningLR(sec);else renderListeningPanel(sec);
+  var rp2=document.querySelector('.right-panel');if(rp2)rp2.scrollTop=st;
+}
+function nextListeningLRQ(){S.lQIdx++;renderListeningLR((S.lModule===1?D.l1:D.l2).sections[S.lSecIdx]);}
+function prevListeningLRQ(){if(S.lQIdx>0){S.lQIdx--;renderListeningLR((S.lModule===1?D.l1:D.l2).sections[S.lSecIdx]);}}
+function nextListeningSection(){
+  const mod=S.lModule===1?D.l1:D.l2;
+  S.lSecIdx++;S.lQIdx=0;
+  if(S.lSecIdx>=mod.sections.length){if(S.lModule===1)goListeningM2();else goWriting();}
+  else renderListening();
+}
+
+// ===== SPEAKING =====
+function renderSpeaking(){
+  $('slbl').textContent='Speaking Section';
+  if(S.spPart===1)renderSpLR();else renderSpInterview();
+}
+function renderSpLR(){
+  $('plbl').textContent='Part 1 — Listen and Repeat';
+  const lr=D.sp.listenRepeat,qi=S.spQIdx,item=lr.items[qi];
+  app().innerHTML=`
+    <div class="ph"><div class="pt">Speaking Part 1 — Listen and Repeat</div><div class="ps">Item ${qi+1} of ${lr.items.length}</div></div>
+    <div class="prog-out"><div class="prog-in" style="width:${(qi+1)/lr.items.length*100}%"></div></div>
+    <div class="card" style="margin-top:18px;">
+      <div class="akshar" style="font-size:.88em;color:var(--gray);margin-bottom:18px;line-height:1.6;">${escH(lr.context)}</div>
+      ${mkAudio(item.audio,'sp_lr_'+qi)}
+      <div class="akshar" style="font-size:1.05em;margin:16px 0;padding:14px;background:#f5f0eb;border-radius:8px;border-left:3px solid var(--pri);">${escH(item.text)}</div>
+      <div style="margin-top:14px;padding:18px;border:1.5px dashed var(--border);border-radius:8px;text-align:center;color:var(--gray);font-size:.9em;">🎤 Repeat the sentence aloud</div>
+    </div>
+    <div class="nav">
+      ${qi>0?`<button class="btn btn-gray" onclick="prevSpLR()">← Previous</button>`:'<div></div>'}
+      ${qi<lr.items.length-1
+        ?`<button class="btn btn-acc" onclick="nextSpLR()">Next →</button>`
+        :`<button class="btn btn-acc" onclick="S.spPart=2;S.spQIdx=0;renderSpeaking()">Next Part →</button>`}
+    </div>`;
+}
+function nextSpLR(){if(S.spQIdx<D.sp.listenRepeat.items.length-1){S.spQIdx++;renderSpLR();}}
+function prevSpLR(){if(S.spQIdx>0){S.spQIdx--;renderSpLR();}}
+function renderSpInterview(){
+  $('plbl').textContent='Part 2 — Interview';
+  const iv=D.sp.interview,qi=S.spQIdx,q=iv.qs[qi];
+  app().innerHTML=`
+    <div class="ph"><div class="pt">Speaking Part 2 — Interview</div><div class="ps">Question ${qi+1} of ${iv.qs.length}</div></div>
+    <div class="prog-out"><div class="prog-in" style="width:${(qi+1)/iv.qs.length*100}%"></div></div>
+    <div class="card" style="margin-top:18px;">
+      <div class="akshar" style="font-size:.88em;color:var(--gray);margin-bottom:18px;line-height:1.6;">${escH(iv.context)}</div>
+      ${mkAudio(q.audio,'sp_iv_'+qi)}
+      <div class="akshar" style="font-size:1em;margin:16px 0;padding:14px;background:#f5f0eb;border-radius:8px;border-left:3px solid var(--pri);">${escH(q.q)}</div>
+      <div style="margin-top:14px;padding:28px 18px;border:1.5px dashed var(--border);border-radius:8px;text-align:center;color:var(--gray);font-size:.9em;">🎤 Answer the question aloud</div>
+    </div>
+    <div class="nav">
+      ${qi>0?`<button class="btn btn-gray" onclick="prevSpIV()">← Previous</button>`:'<div></div>'}
+      ${qi<iv.qs.length-1
+        ?`<button class="btn btn-acc" onclick="nextSpIV()">Next →</button>`
+        :`<button class="btn btn-acc" onclick="goResults()">Finish &amp; See Results →</button>`}
+    </div>`;
+}
+function nextSpIV(){if(S.spQIdx<D.sp.interview.qs.length-1){S.spQIdx++;renderSpInterview();}}
+function prevSpIV(){if(S.spQIdx>0){S.spQIdx--;renderSpInterview();}}
 
 // ===== AI SCORING (preserved exactly) =====
 async function callScore(response,rubric,ctx){
@@ -821,6 +1000,12 @@ function renderResults(){
   }).length;
   var w2raw=S.w2sc?S.w2sc.score:null, w3raw=S.w3sc?S.w3sc.score:null;
   var rT=toflR(r1ok,r2ok,r3ok), wT=toflW(w1ok,S.w2sc,S.w3sc), wFull=!!S.w2sc&&!!S.w3sc, tT=toflTotal(rT,wT);
+  // Listening scores
+  var l1ok=0,l2ok=0;
+  if(D.l1)D.l1.sections.forEach(function(sec){sec.qs.forEach(function(q,j){if(S.l1ans[sec.qStart+j]===q.ans)l1ok++;});});
+  if(D.l2)D.l2.sections.forEach(function(sec){sec.qs.forEach(function(q,j){if(S.l2ans[sec.qStart+j]===q.ans)l2ok++;});});
+  var lTot=l1ok+l2ok,lTotal=18+16;
+  var lT=Math.round(lTot/lTotal*6*2)/2;
   var spinnerSm='<span class="spin" style="width:14px;height:14px;border-width:2px;"></span>';
 
   // ── Reading review ──
@@ -897,6 +1082,25 @@ function renderResults(){
     rRev+='</div>';
   }
 
+  // ── Listening review ──
+  var lRev='';
+  if(D.l1&&D.l2){
+    [[D.l1.sections,S.l1ans,1],[D.l2.sections,S.l2ans,2]].forEach(function(pair){
+      var secs=pair[0],ans=pair[1],mod=pair[2];
+      secs.forEach(function(sec){
+        var secLabel=sec.type==='listenResponse'?'Choose the Best Response':sec.type==='conversation'?'Short Conversation':sec.type==='announcement'?'Announcement':'Academic Talk';
+        var secOk=0;sec.qs.forEach(function(q,j){if(ans[sec.qStart+j]===q.ans)secOk++;});
+        lRev+='<div class="rev-sec"><div class="rev-title">🎧 Module '+mod+' — '+secLabel+' <span style="font-weight:400;font-size:.82em;color:var(--gray);">('+secOk+'/'+sec.qs.length+')</span></div>';
+        sec.qs.forEach(function(q,j){
+          var gi=sec.qStart+j,sel=ans[gi],ok=sel===q.ans;
+          var qLabel=sec.type==='listenResponse'?escH(q.prompt):escH(q.q);
+          lRev+='<div class="rev-q" style="background:'+(ok?'#e8f5e9':'#ffebee')+';margin-bottom:7px;"><div style="font-weight:600;margin-bottom:4px;">'+(gi+1)+'. '+qLabel+'</div>'+revMCQ(ok,q.opts[q.ans],sel!=null?q.opts[sel]:undefined)+'</div>';
+        });
+        lRev+='</div>';
+      });
+    });
+  }
+
   // ── W1 review ──
   var w1Rev='<div class="rev-sec"><div class="rev-title">🔤 Writing Part 1 — Build a Sentence <span style="font-weight:400;font-size:.82em;color:var(--gray);">('+w1ok+'/10)</span></div>';
   D.w1.forEach(function(q,qi){
@@ -944,6 +1148,8 @@ function renderResults(){
     ?[{l:'Module 1 — Complete the Words',s:m1r1ok,t:10},{l:'Module 1 — Reading',s:m1rok,t:10},{l:'Module 2 — Complete the Words',s:m2r1ok,t:10},{l:'Module 2 — Reading',s:m2rok,t:10}]
     :[{l:'Part 1 — Complete the Words',s:r1ok,t:10},{l:'Part 2 — Reading in Daily Life',s:r2ok,t:15},{l:'Part 3 — Academic Passages',s:r3ok,t:15}];
   var rCard=sCard('📖 Reading',rT,true,rParts);
+  var lParts=[{l:'Module 1 (18 Q)',s:l1ok,t:18},{l:'Module 2 (16 Q)',s:l2ok,t:16}];
+  var lCard=sCard('🎧 Listening',lT,true,lParts);
 
   var w2disp2=S.w2ld?'…':w2raw!==null?w2raw+'/5':'—';
   var w3disp2=S.w3ld?'…':w3raw!==null?w3raw+'/5':'—';
@@ -967,10 +1173,10 @@ function renderResults(){
     +'<div style="margin-bottom:4px;">'+totalDisp+'</div>'
     +'<div style="font-size:.8em;color:var(--gray);margin-top:2px;">(Reading + Writing average, converted to TOEFL 0–6 scale)</div>'
     +'</div>'
-    +'<div class="res-grid" style="margin-bottom:22px;">'+rCard+wCardManual+'</div>'
+    +'<div class="res-grid" style="margin-bottom:22px;grid-template-columns:repeat(3,1fr);">'+rCard+lCard+wCardManual+'</div>'
     +'<div style="text-align:center;margin-bottom:28px;"><button class="btn btn-pri" style="font-size:.9em;padding:10px 28px;" onclick="location.reload()">&#8635; Start a New Test</button></div>'
     +'<div style="font-size:.82em;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:12px;">Answer Review</div>'
-    +rRev+w1Rev+wRev
+    +rRev+lRev+w1Rev+wRev
     +'</div>';
 }
 
@@ -986,9 +1192,13 @@ function renderIntro(){
       '<div>📝 Module 1 &nbsp;— Complete the Words + Reading <span style="float:right;">20 Q · 12 min</span></div>'
      +'<div>📝 Module 2 &nbsp;— Complete the Words + Reading <span style="float:right;">20 Q · 12 min</span></div>'
      +'<div style="font-size:.8em;color:var(--acc);margin:2px 0 8px;">⚠️ Cannot return to Module 1 once Module 2 begins</div>'
+     +'<div>🎧 Listening Module 1 — Listen &amp; Respond + Conversations + Talks <span style="float:right;">18 Q · 10 min</span></div>'
+     +'<div>🎧 Listening Module 2 — Listen &amp; Respond + Conversations + Talks <span style="float:right;">16 Q · 10 min</span></div>'
      +'<div>🔤 Writing Part 1 — Build a Sentence <span style="float:right;">10 Q · 5 min</span></div>'
      +'<div>📧 Writing Part 2 — Email Writing <span style="float:right;">1 Task · 7 min</span></div>'
-     +'<div>💬 Writing Part 3 — Academic Discussion <span style="float:right;">1 Task · 10 min</span></div>';
+     +'<div>💬 Writing Part 3 — Academic Discussion <span style="float:right;">1 Task · 10 min</span></div>'
+     +'<div>🎤 Speaking Part 1 — Listen and Repeat <span style="float:right;">7 items · 15 min</span></div>'
+     +'<div>🎤 Speaking Part 2 — Interview <span style="float:right;">4 questions</span></div>';
   } else {
     structHTML=
       '<div>📝 Reading Part 1 &nbsp;— Complete the Words <span style="float:right;">10 Q</span></div>'
@@ -1006,7 +1216,9 @@ function renderIntro(){
       <div style="font-size:.95em;color:var(--gray);margin-bottom:24px;">2026 Edition</div>
       <div class="iinfo">
         <div class="icard"><h3>📖 Reading</h3><p>${rInfo}</p></div>
+        <div class="icard"><h3>🎧 Listening</h3><p>34 questions<br>20 minutes</p></div>
         <div class="icard"><h3>✍️ Writing</h3><p>12 questions<br>23 minutes</p></div>
+        <div class="icard"><h3>🎤 Speaking</h3><p>11 items<br>15 minutes</p></div>
       </div>
       <div class="struct">
         <div style="font-weight:700;margin-bottom:10px;color:var(--txt);">Test Structure</div>
