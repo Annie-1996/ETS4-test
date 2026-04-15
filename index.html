@@ -191,7 +191,7 @@ const S = {
   tInt:null, done:false,
   w2sc:null, w3sc:null, w2ld:false, w3ld:false, w2er:null, w3er:null,
   // Listening
-  lModule:1, lSecIdx:0, lQIdx:0,
+  lModule:1, lSecIdx:0, lQIdx:0, lPhase:'listen',
   l1ans:Array(18).fill(null), l2ans:Array(16).fill(null),
   l1Time:10*60, l2Time:10*60, l1Exp:false, l2Exp:false,
   // Speaking
@@ -268,14 +268,14 @@ function goWriting(){
 }
 function goListening(){
   stopTimer();$('tup').style.display='none';
-  S.screen='l';S.lModule=1;S.lSecIdx=0;S.lQIdx=0;
+  S.screen='l';S.lModule=1;S.lSecIdx=0;S.lQIdx=0;S.lPhase='listen';
   $('slbl').textContent='Listening Section';
   $('plbl').textContent='Module 1 of 2';
   startTimer('l1');renderListening();
 }
 function goListeningM2(){
   stopTimer();$('tup').style.display='none';
-  S.lModule=2;S.lSecIdx=0;S.lQIdx=0;
+  S.lModule=2;S.lSecIdx=0;S.lQIdx=0;S.lPhase='listen';
   $('plbl').textContent='Module 2 of 2';
   startTimer('l2');renderListening();
 }
@@ -777,9 +777,32 @@ function renderListeningLR(sec){
     </div>`;
 }
 function renderListeningPanel(sec){
+  const typeLabel=sec.type==='conversation'?'Short Conversation':sec.type==='announcement'?'Announcement':'Academic Talk';
   const mod=S.lModule===1?D.l1:D.l2;
-  const lans=S.lModule===1?S.l1ans:S.l2ans;
   const totalQs=mod.sections.reduce(function(a,s){return a+s.qs.length;},0);
+  const subLabel=sec.subject?sec.subject+' · ':'';
+  // ── Listen phase: play audio first ──
+  if(S.lPhase==='listen'){
+    const audId='lp_'+S.lModule+'_'+S.lSecIdx;
+    app().innerHTML=`
+      <div class="ph"><div class="pt">Module ${S.lModule} — ${escH(typeLabel)}</div><div class="ps">${subLabel}Questions ${sec.qStart+1}–${sec.qStart+sec.qs.length} of ${totalQs}</div></div>
+      <div class="card" style="text-align:center;padding:48px 24px;">
+        <div style="font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--pri);margin-bottom:20px;">${escH(typeLabel)}</div>
+        ${mkAudio(sec.qAudio,audId)}
+        <div id="lp_cont_wrap" style="margin-top:28px;">
+          <button id="lp_cont_btn" class="btn btn-acc" onclick="startListeningQs()" disabled style="opacity:.4;cursor:default;">Continue to Questions →</button>
+        </div>
+      </div>`;
+    // enable Continue when audio ends
+    var aud=$(audId+'_aud');
+    if(aud)aud.onended=function(){
+      var b=$(audId+'_btn');if(b)b.textContent='▶ Replay';
+      var c=$('lp_cont_btn');if(c){c.disabled=false;c.style.opacity='1';c.style.cursor='';}
+    };
+    return;
+  }
+  // ── Questions phase ──
+  const lans=S.lModule===1?S.l1ans:S.l2ans;
   let qhtml='';
   sec.qs.forEach(function(q,j){
     const gi=sec.qStart+j,sel=lans[gi];
@@ -796,19 +819,14 @@ function renderListeningPanel(sec){
   const nextBtn=isLast
     ?(S.lModule===1?`<button class="btn btn-acc" onclick="goListeningM2()">Start Module 2 →</button>`:`<button class="btn btn-acc" onclick="goWriting()">Start Writing →</button>`)
     :`<button class="btn btn-acc" onclick="nextListeningSection()">Next →</button>`;
-  const typeLabel=sec.type==='conversation'?'Short Conversation':sec.type==='announcement'?'Announcement':'Academic Talk';
-  const subLabel=sec.subject?sec.subject+' · ':'';
   app().innerHTML=`
     <div class="ph"><div class="pt">Module ${S.lModule} — ${escH(typeLabel)}</div><div class="ps">${subLabel}Questions ${sec.qStart+1}–${sec.qStart+sec.qs.length} of ${totalQs}</div></div>
-    <div class="split">
-      <div class="left-panel">
-        <div style="font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--pri);margin-bottom:6px;">${escH(typeLabel)}</div>
-        ${mkAudio(sec.qAudio,'sec_'+S.lModule+'_'+S.lSecIdx)}
-        <div class="akshar" style="white-space:pre-line;font-size:.9em;line-height:1.85;margin-top:10px;">${escH(sec.script)}</div>
-      </div>
-      <div class="right-panel">${qhtml}</div>
-    </div>
+    <div class="card">${qhtml}</div>
     <div class="nav"><div></div>${nextBtn}</div>`;
+}
+function startListeningQs(){
+  S.lPhase='qs';
+  renderListeningPanel((S.lModule===1?D.l1:D.l2).sections[S.lSecIdx]);
 }
 function selListeningMCQ(gi,oi){
   if(S.done)return;
@@ -822,7 +840,7 @@ function nextListeningLRQ(){S.lQIdx++;renderListeningLR((S.lModule===1?D.l1:D.l2
 function prevListeningLRQ(){if(S.lQIdx>0){S.lQIdx--;renderListeningLR((S.lModule===1?D.l1:D.l2).sections[S.lSecIdx]);}}
 function nextListeningSection(){
   const mod=S.lModule===1?D.l1:D.l2;
-  S.lSecIdx++;S.lQIdx=0;
+  S.lSecIdx++;S.lQIdx=0;S.lPhase='listen';
   if(S.lSecIdx>=mod.sections.length){if(S.lModule===1)goListeningM2();else goWriting();}
   else renderListening();
 }
@@ -1234,5 +1252,51 @@ renderIntro();
 var _el=document.getElementById('test-num-intro');
 if(_el)_el.textContent=_tn;
 </script>
+
+<!-- ═══ DEV NAV ═══ (remove before final deploy) -->
+<div id="devnav" style="position:fixed;bottom:12px;right:12px;z-index:9999;font-family:monospace;font-size:12px;">
+  <button onclick="var p=$('devpanel');p.style.display=p.style.display==='none'?'flex':'none';"
+    style="background:#222;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;">🛠 Dev</button>
+  <div id="devpanel" style="display:none;flex-direction:column;gap:4px;background:#1a1a1a;border:1px solid #444;border-radius:8px;padding:10px;margin-top:6px;min-width:220px;">
+    <div style="color:#aaa;font-size:11px;margin-bottom:4px;">── Listening M1 ──</div>
+    <button onclick="devJump('l',1,0,'listen')" class="dvb">L1-S1 Listen &amp; Response</button>
+    <button onclick="devJump('l',1,1,'listen')" class="dvb">L1-S2 Short Conversation (9-10)</button>
+    <button onclick="devJump('l',1,2,'listen')" class="dvb">L1-S3 Short Conversation (11-12)</button>
+    <button onclick="devJump('l',1,3,'listen')" class="dvb">L1-S4 Announcement</button>
+    <button onclick="devJump('l',1,4,'listen')" class="dvb">L1-S5 Academic Talk</button>
+    <div style="color:#aaa;font-size:11px;margin:6px 0 4px;">── Listening M2 ──</div>
+    <button onclick="devJump('l',2,0,'listen')" class="dvb">L2-S1 Listen &amp; Response</button>
+    <button onclick="devJump('l',2,1,'listen')" class="dvb">L2-S2 Short Conversation</button>
+    <button onclick="devJump('l',2,2,'listen')" class="dvb">L2-S3 Announcement</button>
+    <button onclick="devJump('l',2,3,'listen')" class="dvb">L2-S4 Academic Talk</button>
+    <div style="color:#aaa;font-size:11px;margin:6px 0 4px;">── Speaking ──</div>
+    <button onclick="devJumpSp(1)" class="dvb">SP Part 1 — Listen &amp; Repeat</button>
+    <button onclick="devJumpSp(2)" class="dvb">SP Part 2 — Interview</button>
+  </div>
+</div>
+<style>
+.dvb{background:#2a2a2a;color:#eee;border:1px solid #444;padding:5px 10px;border-radius:4px;cursor:pointer;text-align:left;width:100%;}
+.dvb:hover{background:#3a3a3a;}
+</style>
+<script>
+function devJump(screen,mod,sec,phase){
+  stopTimer();
+  S.screen=screen;S.lModule=mod;S.lSecIdx=sec;S.lQIdx=0;S.lPhase=phase;
+  $('slbl').textContent='Listening Section';
+  $('plbl').textContent='Module '+mod+' of 2';
+  $('tup').style.display='none';
+  document.getElementById('devpanel').style.display='none';
+  renderListening();
+}
+function devJumpSp(part){
+  stopTimer();
+  S.screen='sp';S.spPart=part;S.spQIdx=0;
+  $('slbl').textContent='Speaking Section';
+  $('tup').style.display='none';
+  document.getElementById('devpanel').style.display='none';
+  renderSpeaking();
+}
+</script>
+<!-- ═══ END DEV NAV ═══ -->
 </body>
 </html>
