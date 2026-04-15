@@ -730,13 +730,13 @@ async function scoreW3(){
 // ===== AUDIO HELPER =====
 function mkAudio(src,btnId){
   if(!src)return'';
-  return`<div style="display:flex;align-items:center;gap:10px;margin:10px 0;"><audio id="${btnId}_aud" src="${src}" preload="none"></audio><button id="${btnId}_btn" onclick="toggleAudio('${btnId}_aud','${btnId}_btn')" class="btn btn-gray" style="font-size:.85em;padding:7px 16px;">▶ Play</button><span style="font-size:.8em;color:var(--gray);">click to play audio</span></div>`;
+  return`<div style="display:flex;align-items:center;gap:10px;margin:10px 0;"><audio id="${btnId}_aud" src="${src}" autoplay onended="(function(){var b=document.getElementById('${btnId}_btn');if(b)b.textContent='▶ Replay';})()"></audio><button id="${btnId}_btn" onclick="toggleAudio('${btnId}_aud','${btnId}_btn')" class="btn btn-gray" style="font-size:.85em;padding:7px 16px;">⏸ Pause</button></div>`;
 }
 function toggleAudio(audId,btnId){
   var a=$(audId),b=$(btnId);if(!a)return;
-  if(a.paused){a.play();if(b)b.textContent='⏸ Pause';}
+  if(a.ended){a.currentTime=0;a.play();if(b)b.textContent='⏸ Pause';}
+  else if(a.paused){a.play();if(b)b.textContent='⏸ Pause';}
   else{a.pause();if(b)b.textContent='▶ Play';}
-  a.onended=function(){if(b)b.textContent='▶ Play';};
 }
 
 // ===== LISTENING =====
@@ -769,7 +769,6 @@ function renderListeningLR(sec){
     <div class="card">
       <div style="font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:10px;">Listen and Choose a Response</div>
       ${mkAudio(sec.audios[qi],'lr_'+S.lModule+'_'+qi)}
-      <div class="akshar" style="font-size:1em;margin:16px 0 20px;padding:14px;background:#f5f0eb;border-radius:8px;border-left:3px solid var(--pri);">${escH(q.prompt)}</div>
       ${optsHTML}
     </div>
     <div class="nav">
