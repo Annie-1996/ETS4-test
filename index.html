@@ -818,7 +818,7 @@ function renderListeningLR(sec){
     <div class="ph"><div class="pt">Module ${S.lModule} — Choose the Best Response</div><div class="ps">Question ${globalIdx+1} of ${totalQs}</div></div>
     <div class="card">
       <div style="font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:10px;">Listen and Choose a Response</div>
-      ${mkAudio(sec.audios[qi],audId)}
+      <audio id="${audId}_aud" src="${sec.audios[qi]}" preload="auto" autoplay></audio>
       <div id="lr_twrap" style="display:none;">${mkQtimerBar('lr_tnum','lr_tbar')}</div>
       ${optsHTML}
     </div>
@@ -847,7 +847,7 @@ function renderListeningPanel(sec){
       <div class="ph"><div class="pt">Module ${S.lModule} — ${escH(typeLabel)}</div><div class="ps">${subLabel}Questions ${sec.qStart+1}–${sec.qStart+sec.qs.length} of ${totalQs}</div></div>
       <div class="card" style="text-align:center;padding:48px 24px;">
         <div style="font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--pri);margin-bottom:20px;">${escH(typeLabel)}</div>
-        ${mkAudio(sec.qAudio,audId)}
+        <audio id="${audId}_aud" src="${sec.qAudio}" preload="auto" autoplay></audio>
       </div>`;
     // auto-advance to questions when audio ends
     var aud=$(audId+'_aud');
