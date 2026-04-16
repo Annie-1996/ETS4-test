@@ -70,6 +70,14 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--tx
 .opt.wrong{border-color:var(--err);background:#ffebee;}
 .opt-lt{font-weight:700;color:var(--pri);min-width:18px;}
 .ans-hint{font-size:.8em;color:var(--ok);margin-top:5px;font-weight:600;}
+/* Speaking countdown ring */
+.cring-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center;width:80px;height:80px;}
+.cring-wrap svg{position:absolute;top:0;left:0;}
+.cring-num{font-size:1.3em;font-weight:700;color:var(--pri);z-index:1;}
+/* Listening per-question countdown bar */
+.qtimer{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8f6f2;border-radius:8px;margin-bottom:12px;}
+.qtimer-bar{flex:1;height:4px;background:var(--border);border-radius:2px;}
+.qtimer-fill{height:100%;border-radius:2px;transition:width .9s linear;background:var(--pri);}
 
 /* Letter-box blanks (one box per missing letter) */
 .lboxes{display:inline-flex;gap:3px;vertical-align:middle;margin:0 2px;}
@@ -727,6 +735,46 @@ async function scoreW3(){
   S.w3ld=false;renderW3();
 }
 
+// ===== Q-TIMER (per-question countdown) =====
+var _qt=null;
+function stopQTimer(){clearInterval(_qt);_qt=null;}
+function startQTimer(total,onExpire,ringId,numId,barId){
+  stopQTimer();
+  var rem=total;
+  _qtimerUI(rem,total,ringId,numId,barId);
+  _qt=setInterval(function(){
+    rem--;
+    _qtimerUI(rem,total,ringId,numId,barId);
+    if(rem<=0){stopQTimer();if(onExpire)onExpire();}
+  },1000);
+}
+function _qtimerUI(val,total,ringId,numId,barId){
+  var frac=Math.max(0,val/total);
+  var C=163.4; // 2π×26
+  var lo=val<=5;
+  var col=lo?'var(--err)':'var(--acc)';
+  var colN=lo?'var(--err)':'var(--pri)';
+  if(ringId){var r=$(ringId);if(r){r.style.strokeDashoffset=C*(1-frac);r.style.stroke=col;}}
+  if(numId){var n=$(numId);if(n){n.textContent=Math.max(0,val);n.style.color=colN;}}
+  if(barId){var b=$(barId);if(b){b.style.width=(frac*100)+'%';b.style.background=lo?'var(--err)':'var(--pri)';}}
+}
+function mkRing(ringId,numId,total){
+  var C=163.4;
+  return`<div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin:20px 0 12px;">
+    <div class="cring-wrap">
+      <svg viewBox="0 0 60 60" width="80" height="80" style="transform:rotate(-90deg)">
+        <circle cx="30" cy="30" r="26" fill="none" stroke="#e0e0e0" stroke-width="5"/>
+        <circle id="${ringId}" cx="30" cy="30" r="26" fill="none" stroke="var(--acc)" stroke-width="5" stroke-linecap="round" style="stroke-dasharray:${C};stroke-dashoffset:0;transition:stroke-dashoffset .9s linear;"/>
+      </svg>
+      <span id="${numId}" class="cring-num">${total}</span>
+    </div>
+    <div style="font-size:.75em;color:var(--gray);">seconds remaining</div>
+  </div>`;
+}
+function mkQtimerBar(numId,barId){
+  return`<div class="qtimer"><span style="font-size:.8em;color:var(--gray);">⏱</span><div class="qtimer-bar"><div id="${barId}" class="qtimer-fill" style="width:100%;"></div></div><span style="font-size:1.05em;font-weight:700;color:var(--pri);min-width:28px;text-align:right;" id="${numId}">20</span><span style="font-size:.75em;color:var(--gray);">s</span></div>`;
+}
+
 // ===== AUDIO HELPER =====
 function mkAudio(src,btnId){
   if(!src)return'';
@@ -749,6 +797,7 @@ function renderListening(){
   else renderListeningPanel(sec);
 }
 function renderListeningLR(sec){
+  stopQTimer();
   const qi=S.lQIdx,q=sec.qs[qi],globalIdx=sec.qStart+qi;
   const lans=S.lModule===1?S.l1ans:S.l2ans;
   const sel=lans[globalIdx];
@@ -764,17 +813,27 @@ function renderListeningLR(sec){
   const isLastSec=S.lSecIdx===mod.sections.length-1;
   const nextFn=isLastQ?(isLastSec?(S.lModule===1?'goListeningM2()':'goWriting()'):'nextListeningSection()'):'nextListeningLRQ()';
   const nextLbl=isLastQ&&isLastSec?(S.lModule===1?'Start Module 2 →':'Start Writing →'):'Next →';
+  const audId='lr_'+S.lModule+'_'+qi;
   app().innerHTML=`
     <div class="ph"><div class="pt">Module ${S.lModule} — Choose the Best Response</div><div class="ps">Question ${globalIdx+1} of ${totalQs}</div></div>
     <div class="card">
       <div style="font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:10px;">Listen and Choose a Response</div>
-      ${mkAudio(sec.audios[qi],'lr_'+S.lModule+'_'+qi)}
+      ${mkAudio(sec.audios[qi],audId)}
+      <div id="lr_twrap" style="display:none;">${mkQtimerBar('lr_tnum','lr_tbar')}</div>
       ${optsHTML}
     </div>
     <div class="nav">
       ${qi>0?`<button class="btn btn-gray" onclick="prevListeningLRQ()">← Previous</button>`:'<div></div>'}
       <button class="btn btn-acc" onclick="${nextFn}">${nextLbl}</button>
     </div>`;
+  if(!S.done){
+    var expire=isLastQ?(isLastSec?(S.lModule===1?goListeningM2:goWriting):nextListeningSection):nextListeningLRQ;
+    var aud=$(audId+'_aud');
+    if(aud)aud.addEventListener('ended',function(){
+      var tw=$('lr_twrap');if(tw)tw.style.display='';
+      startQTimer(20,expire,null,'lr_tnum','lr_tbar');
+    });
+  }
 }
 function renderListeningPanel(sec){
   const typeLabel=sec.type==='conversation'?'Short Conversation':sec.type==='announcement'?'Announcement':'Academic Talk';
@@ -801,43 +860,55 @@ function renderListeningPanel(sec){
     };
     return;
   }
-  // ── Questions phase ──
+  // ── Questions phase (one at a time) ──
+  stopQTimer();
   const lans=S.lModule===1?S.l1ans:S.l2ans;
-  let qhtml='';
-  sec.qs.forEach(function(q,j){
-    const gi=sec.qStart+j,sel=lans[gi];
-    qhtml+=`<div class="qcard"><div class="qtxt">${gi+1}. ${escH(q.q)}</div>`;
-    q.opts.forEach(function(o,oi){
-      let cls='opt';
-      if(S.done){cls+=oi===q.ans?' cor':(sel===oi?' wrong':'');}else if(sel===oi)cls+=' sel';
-      qhtml+=`<div class="${cls}" onclick="selListeningMCQ(${gi},${oi})"><span class="opt-lt">${'ABCD'[oi]}</span><span class="akshar">${escH(o)}</span></div>`;
-    });
-    if(S.done&&lans[gi]!==q.ans)qhtml+=`<div class="ans-hint">✓ ${escH(q.opts[q.ans])}</div>`;
-    qhtml+='</div>';
+  const qi=S.lQIdx,q=sec.qs[qi],gi=sec.qStart+qi,sel=lans[gi];
+  let optsHTML='';
+  q.opts.forEach(function(o,oi){
+    let cls='opt';
+    if(S.done){cls+=oi===q.ans?' cor':(sel===oi?' wrong':'');}else if(sel===oi)cls+=' sel';
+    optsHTML+=`<div class="${cls}" onclick="selListeningMCQ(${gi},${oi})"><span class="opt-lt">${'ABCD'[oi]}</span><span class="akshar">${escH(o)}</span></div>`;
   });
-  const isLast=S.lSecIdx===mod.sections.length-1;
-  const nextBtn=isLast
-    ?(S.lModule===1?`<button class="btn btn-acc" onclick="goListeningM2()">Start Module 2 →</button>`:`<button class="btn btn-acc" onclick="goWriting()">Start Writing →</button>`)
-    :`<button class="btn btn-acc" onclick="nextListeningSection()">Next →</button>`;
+  const isLastQ=qi===sec.qs.length-1;
+  const isLastSec=S.lSecIdx===mod.sections.length-1;
+  const nextFnStr=isLastQ?(isLastSec?(S.lModule===1?'goListeningM2()':'goWriting()'):'nextListeningSection()'):'nextListeningPanelQ()';
+  const nextLbl=isLastQ&&isLastSec?(S.lModule===1?'Start Module 2 →':'Start Writing →'):'Next →';
   app().innerHTML=`
-    <div class="ph"><div class="pt">Module ${S.lModule} — ${escH(typeLabel)}</div><div class="ps">${subLabel}Questions ${sec.qStart+1}–${sec.qStart+sec.qs.length} of ${totalQs}</div></div>
-    <div class="card">${qhtml}</div>
-    <div class="nav"><div></div>${nextBtn}</div>`;
+    <div class="ph"><div class="pt">Module ${S.lModule} — ${escH(typeLabel)}</div><div class="ps">${subLabel}Question ${gi+1} of ${totalQs}</div></div>
+    <div class="card">
+      ${mkQtimerBar('lp_tnum','lp_tbar')}
+      <div class="qcard"><div class="qtxt">${gi+1}. ${escH(q.q)}</div>${optsHTML}${S.done&&sel!==q.ans?`<div class="ans-hint">✓ ${escH(q.opts[q.ans])}</div>`:''}</div>
+    </div>
+    <div class="nav">
+      ${qi>0?`<button class="btn btn-gray" onclick="prevListeningPanelQ()">← Previous</button>`:'<div></div>'}
+      <button class="btn btn-acc" onclick="${nextFnStr}">${nextLbl}</button>
+    </div>`;
+  if(!S.done){
+    var expire=isLastQ?(isLastSec?(S.lModule===1?goListeningM2:goWriting):nextListeningSection):nextListeningPanelQ;
+    startQTimer(20,expire,null,'lp_tnum','lp_tbar');
+  }
 }
 function startListeningQs(){
-  S.lPhase='qs';
+  S.lPhase='qs';S.lQIdx=0;
   renderListeningPanel((S.lModule===1?D.l1:D.l2).sections[S.lSecIdx]);
 }
+function nextListeningPanelQ(){S.lQIdx++;renderListeningPanel((S.lModule===1?D.l1:D.l2).sections[S.lSecIdx]);}
+function prevListeningPanelQ(){if(S.lQIdx>0){S.lQIdx--;renderListeningPanel((S.lModule===1?D.l1:D.l2).sections[S.lSecIdx]);}}
 function selListeningMCQ(gi,oi){
   if(S.done)return;
-  var rp=document.querySelector('.right-panel');var st=rp?rp.scrollTop:0;
   if(S.lModule===1)S.l1ans[gi]=oi;else S.l2ans[gi]=oi;
-  const sec=(S.lModule===1?D.l1:D.l2).sections[S.lSecIdx];
-  if(sec.type==='listenResponse')renderListeningLR(sec);else renderListeningPanel(sec);
-  var rp2=document.querySelector('.right-panel');if(rp2)rp2.scrollTop=st;
+  // Update opt classes in-place (no re-render, no timer reset)
+  document.querySelectorAll('.opt').forEach(function(el){
+    var oc=el.getAttribute('onclick')||'';
+    var m=oc.match(/selListeningMCQ\((\d+),(\d+)\)/);
+    if(m&&parseInt(m[1])===gi){
+      el.className='opt'+(parseInt(m[2])===oi?' sel':'');
+    }
+  });
 }
-function nextListeningLRQ(){S.lQIdx++;renderListeningLR((S.lModule===1?D.l1:D.l2).sections[S.lSecIdx]);}
-function prevListeningLRQ(){if(S.lQIdx>0){S.lQIdx--;renderListeningLR((S.lModule===1?D.l1:D.l2).sections[S.lSecIdx]);}}
+function nextListeningLRQ(){stopQTimer();S.lQIdx++;renderListeningLR((S.lModule===1?D.l1:D.l2).sections[S.lSecIdx]);}
+function prevListeningLRQ(){stopQTimer();if(S.lQIdx>0){S.lQIdx--;renderListeningLR((S.lModule===1?D.l1:D.l2).sections[S.lSecIdx]);}}
 function nextListeningSection(){
   const mod=S.lModule===1?D.l1:D.l2;
   S.lSecIdx++;S.lQIdx=0;S.lPhase='listen';
@@ -851,47 +922,67 @@ function renderSpeaking(){
   if(S.spPart===1)renderSpLR();else renderSpInterview();
 }
 function renderSpLR(){
+  stopQTimer();
   $('plbl').textContent='Part 1 — Listen and Repeat';
   const lr=D.sp.listenRepeat,qi=S.spQIdx,item=lr.items[qi];
+  const audId='sp_lr_'+qi;
+  const isLast=qi>=lr.items.length-1;
+  const nextFnStr=isLast?`S.spPart=2;S.spQIdx=0;renderSpeaking()`:`nextSpLR()`;
+  const nextLbl=isLast?'Next Part →':'Next →';
   app().innerHTML=`
     <div class="ph"><div class="pt">Speaking Part 1 — Listen and Repeat</div><div class="ps">Item ${qi+1} of ${lr.items.length}</div></div>
     <div class="prog-out"><div class="prog-in" style="width:${(qi+1)/lr.items.length*100}%"></div></div>
-    <div class="card" style="margin-top:18px;">
-      <div class="akshar" style="font-size:.88em;color:var(--gray);margin-bottom:18px;line-height:1.6;">${escH(lr.context)}</div>
-      ${mkAudio(item.audio,'sp_lr_'+qi)}
-      <div class="akshar" style="font-size:1.05em;margin:16px 0;padding:14px;background:#f5f0eb;border-radius:8px;border-left:3px solid var(--pri);">${escH(item.text)}</div>
-      <div style="margin-top:14px;padding:18px;border:1.5px dashed var(--border);border-radius:8px;text-align:center;color:var(--gray);font-size:.9em;">🎤 Repeat the sentence aloud</div>
+    <div class="card" style="margin-top:18px;text-align:center;">
+      <div class="akshar" style="font-size:.88em;color:var(--gray);margin-bottom:12px;line-height:1.6;text-align:left;">${escH(lr.context)}</div>
+      ${mkAudio(item.audio,audId)}
+      <div id="sp_lr_ring_wrap" style="display:none;">${mkRing('sp_lr_ring','sp_lr_num',10)}</div>
+      <div class="akshar" style="font-size:1.05em;margin:16px 0;padding:14px;background:#f5f0eb;border-radius:8px;border-left:3px solid var(--pri);text-align:left;">${escH(item.text)}</div>
+      <div style="margin-top:14px;padding:18px;border:1.5px dashed var(--border);border-radius:8px;color:var(--gray);font-size:.9em;">🎤 Repeat the sentence aloud</div>
     </div>
     <div class="nav">
       ${qi>0?`<button class="btn btn-gray" onclick="prevSpLR()">← Previous</button>`:'<div></div>'}
-      ${qi<lr.items.length-1
-        ?`<button class="btn btn-acc" onclick="nextSpLR()">Next →</button>`
-        :`<button class="btn btn-acc" onclick="S.spPart=2;S.spQIdx=0;renderSpeaking()">Next Part →</button>`}
+      <button class="btn btn-acc" onclick="${nextFnStr}">${nextLbl}</button>
     </div>`;
+  var expire=isLast?function(){S.spPart=2;S.spQIdx=0;renderSpeaking();}:nextSpLR;
+  var aud=$(audId+'_aud');
+  if(aud)aud.addEventListener('ended',function(){
+    var w=$('sp_lr_ring_wrap');if(w)w.style.display='';
+    startQTimer(10,expire,'sp_lr_ring','sp_lr_num',null);
+  });
 }
-function nextSpLR(){if(S.spQIdx<D.sp.listenRepeat.items.length-1){S.spQIdx++;renderSpLR();}}
-function prevSpLR(){if(S.spQIdx>0){S.spQIdx--;renderSpLR();}}
+function nextSpLR(){stopQTimer();if(S.spQIdx<D.sp.listenRepeat.items.length-1){S.spQIdx++;renderSpLR();}}
+function prevSpLR(){stopQTimer();if(S.spQIdx>0){S.spQIdx--;renderSpLR();}}
 function renderSpInterview(){
+  stopQTimer();
   $('plbl').textContent='Part 2 — Interview';
   const iv=D.sp.interview,qi=S.spQIdx,q=iv.qs[qi];
+  const audId='sp_iv_'+qi;
+  const isLast=qi>=iv.qs.length-1;
+  const nextFnStr=isLast?`goResults()`:`nextSpIV()`;
+  const nextLbl=isLast?'Finish & See Results →':'Next →';
   app().innerHTML=`
     <div class="ph"><div class="pt">Speaking Part 2 — Interview</div><div class="ps">Question ${qi+1} of ${iv.qs.length}</div></div>
     <div class="prog-out"><div class="prog-in" style="width:${(qi+1)/iv.qs.length*100}%"></div></div>
-    <div class="card" style="margin-top:18px;">
-      <div class="akshar" style="font-size:.88em;color:var(--gray);margin-bottom:18px;line-height:1.6;">${escH(iv.context)}</div>
-      ${mkAudio(q.audio,'sp_iv_'+qi)}
-      <div class="akshar" style="font-size:1em;margin:16px 0;padding:14px;background:#f5f0eb;border-radius:8px;border-left:3px solid var(--pri);">${escH(q.q)}</div>
-      <div style="margin-top:14px;padding:28px 18px;border:1.5px dashed var(--border);border-radius:8px;text-align:center;color:var(--gray);font-size:.9em;">🎤 Answer the question aloud</div>
+    <div class="card" style="margin-top:18px;text-align:center;">
+      <div class="akshar" style="font-size:.88em;color:var(--gray);margin-bottom:12px;line-height:1.6;text-align:left;">${escH(iv.context)}</div>
+      ${mkAudio(q.audio,audId)}
+      <div id="sp_iv_ring_wrap" style="display:none;">${mkRing('sp_iv_ring','sp_iv_num',45)}</div>
+      <div class="akshar" style="font-size:1em;margin:16px 0;padding:14px;background:#f5f0eb;border-radius:8px;border-left:3px solid var(--pri);text-align:left;">${escH(q.q)}</div>
+      <div style="margin-top:14px;padding:28px 18px;border:1.5px dashed var(--border);border-radius:8px;color:var(--gray);font-size:.9em;">🎤 Answer the question aloud</div>
     </div>
     <div class="nav">
       ${qi>0?`<button class="btn btn-gray" onclick="prevSpIV()">← Previous</button>`:'<div></div>'}
-      ${qi<iv.qs.length-1
-        ?`<button class="btn btn-acc" onclick="nextSpIV()">Next →</button>`
-        :`<button class="btn btn-acc" onclick="goResults()">Finish &amp; See Results →</button>`}
+      <button class="btn btn-acc" onclick="${nextFnStr}">${nextLbl}</button>
     </div>`;
+  var expire=isLast?goResults:nextSpIV;
+  var aud=$(audId+'_aud');
+  if(aud)aud.addEventListener('ended',function(){
+    var w=$('sp_iv_ring_wrap');if(w)w.style.display='';
+    startQTimer(45,expire,'sp_iv_ring','sp_iv_num',null);
+  });
 }
-function nextSpIV(){if(S.spQIdx<D.sp.interview.qs.length-1){S.spQIdx++;renderSpInterview();}}
-function prevSpIV(){if(S.spQIdx>0){S.spQIdx--;renderSpInterview();}}
+function nextSpIV(){stopQTimer();if(S.spQIdx<D.sp.interview.qs.length-1){S.spQIdx++;renderSpInterview();}}
+function prevSpIV(){stopQTimer();if(S.spQIdx>0){S.spQIdx--;renderSpInterview();}}
 
 // ===== AI SCORING (preserved exactly) =====
 async function callScore(response,rubric,ctx){
