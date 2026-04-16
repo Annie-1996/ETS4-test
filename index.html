@@ -293,7 +293,7 @@ function goModule2(){
   startTimer('m2');renderReadingETS();
 }
 function goWriting(){
-  stopTimer();S.screen='w';S.wPart=1;S.wQIdx=0;
+  stopQTimer();stopTimer();S.screen='w';S.wPart=1;S.wQIdx=0;
   $('tup').style.display='none';$('slbl').textContent='Writing Section';
   startTimer('w1');renderWriting();
 }
@@ -305,20 +305,20 @@ function goListening(){
   startTimer('l1');renderListening();
 }
 function goListeningM2(){
-  stopTimer();$('tup').style.display='none';
+  stopQTimer();stopTimer();$('tup').style.display='none';
   S.lModule=2;S.lSecIdx=0;S.lQIdx=0;S.lPhase='listen';
   $('plbl').textContent='Module 2 of 2';
   startTimer('l2');renderListening();
 }
 function goSpeaking(){
-  stopTimer();S.screen='sp';S.spPart=1;S.spQIdx=0;
+  stopQTimer();stopTimer();S.screen='sp';S.spPart=1;S.spQIdx=0;
   $('tup').style.display='none';
   $('slbl').textContent='Speaking Section';
   $('plbl').textContent='Part 1 — Listen and Repeat';
   startTimer('sp');renderSpeaking();
 }
 function goResults(){
-  stopTimer();S.screen='res';S.done=true;
+  stopQTimer();stopTimer();S.screen='res';S.done=true;
   $('tbar').style.display='none';$('tup').style.display='none';
   renderResults();
   autoScoreSequential();
@@ -854,6 +854,7 @@ function renderListeningPanel(sec){
   const subLabel=sec.subject?sec.subject+' · ':'';
   // ── Listen phase: play audio first ──
   if(S.lPhase==='listen'){
+    stopQTimer();
     const audId='lp_'+S.lModule+'_'+S.lSecIdx;
     app().innerHTML=`
       <div class="ph"><div class="pt">Module ${S.lModule} — ${escH(typeLabel)}</div><div class="ps">${subLabel}Questions ${sec.qStart+1}–${sec.qStart+sec.qs.length} of ${totalQs}</div></div>
@@ -917,6 +918,7 @@ function selListeningMCQ(gi,oi){
 function nextListeningLRQ(){stopQTimer();S.lQIdx++;renderListeningLR((S.lModule===1?D.l1:D.l2).sections[S.lSecIdx]);}
 function prevListeningLRQ(){stopQTimer();if(S.lQIdx>0){S.lQIdx--;renderListeningLR((S.lModule===1?D.l1:D.l2).sections[S.lSecIdx]);}}
 function nextListeningSection(){
+  stopQTimer();
   const mod=S.lModule===1?D.l1:D.l2;
   S.lSecIdx++;S.lQIdx=0;S.lPhase='listen';
   if(S.lSecIdx>=mod.sections.length){if(S.lModule===1)goListeningM2();else goWriting();}
