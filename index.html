@@ -818,10 +818,13 @@ function renderListeningLR(sec){
   if(!S.done){
     var expire=isLastQ?(isLastSec?(S.lModule===1?goListeningM2:goWriting):nextListeningSection):nextListeningLRQ;
     var aud=$(audId+'_aud');
-    if(aud)aud.addEventListener('ended',function(){
-      var tw=$('lr_twrap');if(tw)tw.style.display='';
-      startQTimer(20,expire,null,'lr_tnum','lr_tbar');
-    });
+    if(aud){
+      aud.play();
+      aud.addEventListener('ended',function(){
+        var tw=$('lr_twrap');if(tw)tw.style.display='';
+        startQTimer(20,expire,null,'lr_tnum','lr_tbar');
+      });
+    }
   }
 }
 function renderListeningPanel(sec){
@@ -840,9 +843,12 @@ function renderListeningPanel(sec){
       </div>`;
     // auto-advance to questions when audio ends
     var aud=$(audId+'_aud');
-    if(aud)aud.onended=function(){
-      startListeningQs();
-    };
+    if(aud){
+      aud.play();
+      aud.onended=function(){
+        startListeningQs();
+      };
+    }
     return;
   }
   // ── Questions phase (one at a time) ──
@@ -925,10 +931,13 @@ function renderSpLR(){
     </div>`;
   var expire=isLast?function(){S.spPart=2;S.spQIdx=0;renderSpeaking();}:nextSpLR;
   var aud=$(audId+'_aud');
-  if(aud)aud.addEventListener('ended',function(){
-    var w=$('sp_lr_ring_wrap');if(w)w.style.display='';
-    startQTimer(10,expire,'sp_lr_ring','sp_lr_num',null);
-  });
+  if(aud){
+    aud.play();
+    aud.addEventListener('ended',function(){
+      var w=$('sp_lr_ring_wrap');if(w)w.style.display='';
+      startQTimer(10,expire,'sp_lr_ring','sp_lr_num',null);
+    });
+  }
 }
 function nextSpLR(){stopQTimer();if(S.spQIdx<D.sp.listenRepeat.items.length-1){S.spQIdx++;renderSpLR();}}
 function prevSpLR(){stopQTimer();if(S.spQIdx>0){S.spQIdx--;renderSpLR();}}
@@ -951,10 +960,13 @@ function renderSpInterview(){
     </div>`;
   var expire=isLast?goResults:nextSpIV;
   var aud=$(audId+'_aud');
-  if(aud)aud.addEventListener('ended',function(){
-    var w=$('sp_iv_ring_wrap');if(w)w.style.display='';
-    startQTimer(45,expire,'sp_iv_ring','sp_iv_num',null);
-  });
+  if(aud){
+    aud.play();
+    aud.addEventListener('ended',function(){
+      var w=$('sp_iv_ring_wrap');if(w)w.style.display='';
+      startQTimer(45,expire,'sp_iv_ring','sp_iv_num',null);
+    });
+  }
 }
 function nextSpIV(){stopQTimer();if(S.spQIdx<D.sp.interview.qs.length-1){S.spQIdx++;renderSpInterview();}}
 function prevSpIV(){stopQTimer();if(S.spQIdx>0){S.spQIdx--;renderSpInterview();}}
