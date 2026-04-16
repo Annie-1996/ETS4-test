@@ -212,6 +212,20 @@ let W1ORDERS=null;
 function getW1Order(i){if(!W1ORDERS)W1ORDERS=D.w1.map(q=>shuffle([...q.words]));return W1ORDERS[i];}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
+// ===== AUDIO UNLOCK =====
+// Unlocks audio context on first user click so timer-triggered play() works
+(function(){
+  var unlocked=false;
+  document.addEventListener('click',function(){
+    if(unlocked)return;unlocked=true;
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var buf=ctx.createBuffer(1,1,22050);
+    var src=ctx.createBufferSource();
+    src.buffer=buf;src.connect(ctx.destination);src.start(0);
+    ctx.close();
+  },{once:true});
+})();
+
 // ===== HELPERS =====
 const $=id=>document.getElementById(id);
 const app=()=>$('app');
@@ -819,7 +833,7 @@ function renderListeningLR(sec){
     var expire=isLastQ?(isLastSec?(S.lModule===1?goListeningM2:goWriting):nextListeningSection):nextListeningLRQ;
     var aud=$(audId+'_aud');
     if(aud){
-      aud.play();
+      aud.play().catch(function(){});
       aud.addEventListener('waiting',function(){aud.play().catch(function(){});});
       aud.addEventListener('ended',function(){
         var tw=$('lr_twrap');if(tw)tw.style.display='';
@@ -845,7 +859,7 @@ function renderListeningPanel(sec){
     // auto-advance to questions when audio ends
     var aud=$(audId+'_aud');
     if(aud){
-      aud.play();
+      aud.play().catch(function(){});
       aud.addEventListener('waiting',function(){aud.play().catch(function(){});});
       aud.onended=function(){
         startListeningQs();
@@ -934,7 +948,7 @@ function renderSpLR(){
   var expire=isLast?function(){S.spPart=2;S.spQIdx=0;renderSpeaking();}:nextSpLR;
   var aud=$(audId+'_aud');
   if(aud){
-    aud.play();
+    aud.play().catch(function(){});
     aud.addEventListener('waiting',function(){aud.play().catch(function(){});});
     aud.addEventListener('ended',function(){
       var w=$('sp_lr_ring_wrap');if(w)w.style.display='';
@@ -964,7 +978,7 @@ function renderSpInterview(){
   var expire=isLast?goResults:nextSpIV;
   var aud=$(audId+'_aud');
   if(aud){
-    aud.play();
+    aud.play().catch(function(){});
     aud.addEventListener('waiting',function(){aud.play().catch(function(){});});
     aud.addEventListener('ended',function(){
       var w=$('sp_iv_ring_wrap');if(w)w.style.display='';
