@@ -172,6 +172,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--tx
   <div class="tdisp" id="tdisp">27:00</div>
 </div>
 <div class="wrap" id="app"></div>
+<audio id="global-aud" preload="auto"></audio>
 
 <script>
 // ===== DATA & SCHEMA =====
@@ -212,19 +213,27 @@ let W1ORDERS=null;
 function getW1Order(i){if(!W1ORDERS)W1ORDERS=D.w1.map(q=>shuffle([...q.words]));return W1ORDERS[i];}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
-// ===== AUDIO UNLOCK =====
-// Unlocks audio context on first user click so timer-triggered play() works
-(function(){
-  var unlocked=false;
-  document.addEventListener('click',function(){
-    if(unlocked)return;unlocked=true;
-    var ctx=new(window.AudioContext||window.webkitAudioContext)();
-    var buf=ctx.createBuffer(1,1,22050);
-    var src=ctx.createBufferSource();
-    src.buffer=buf;src.connect(ctx.destination);src.start(0);
-    ctx.close();
-  },{once:true});
-})();
+// ===== GLOBAL AUDIO PLAYER =====
+// Single persistent <audio> element so timer-triggered play() always works
+function playAudio(src,onEnded){
+  var a=$('global-aud');if(!a)return;
+  a.onended=null;
+  if(a._wfn){a.removeEventListener('waiting',a._wfn);a._wfn=null;}
+  a.src=src;a.load();
+  a.play().catch(function(){});
+  a._wfn=function(){a.play().catch(function(){});};
+  a.addEventListener('waiting',a._wfn);
+  a.onended=onEnded||null;
+}
+function toggleGlobalAudio(btnId){
+  var a=$('global-aud'),b=$(btnId);if(!a)return;
+  if(a.ended){a.currentTime=0;a.play().catch(function(){});if(b)b.textContent='⏸ Pause';}
+  else if(a.paused){a.play().catch(function(){});if(b)b.textContent='⏸ Pause';}
+  else{a.pause();if(b)b.textContent='▶ Play';}
+}
+function mkAudioBtn(btnId){
+  return`<button id="${btnId}" onclick="toggleGlobalAudio('${btnId}')" class="btn btn-gray" style="font-size:.85em;padding:7px 16px;margin:10px 0;">⏸ Pause</button>`;
+}
 
 // ===== HELPERS =====
 const $=id=>document.getElementById(id);
@@ -821,7 +830,7 @@ function renderListeningLR(sec){
     <div class="ph"><div class="pt">Module ${S.lModule} — Choose the Best Response</div><div class="ps">Question ${globalIdx+1} of ${totalQs}</div></div>
     <div class="card">
       <div style="font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:10px;">Listen and Choose a Response</div>
-      <audio id="${audId}_aud" src="${sec.audios[qi]}" preload="auto" autoplay></audio>
+      ${mkAudioBtn('lr_aud_btn')}
       <div id="lr_twrap" style="display:none;">${mkQtimerBar('lr_tnum','lr_tbar')}</div>
       ${optsHTML}
     </div>
@@ -831,15 +840,11 @@ function renderListeningLR(sec){
     </div>`;
   if(!S.done){
     var expire=isLastQ?(isLastSec?(S.lModule===1?goListeningM2:goWriting):nextListeningSection):nextListeningLRQ;
-    var aud=$(audId+'_aud');
-    if(aud){
-      aud.play().catch(function(){});
-      aud.addEventListener('waiting',function(){aud.play().catch(function(){});});
-      aud.addEventListener('ended',function(){
-        var tw=$('lr_twrap');if(tw)tw.style.display='';
-        startQTimer(20,expire,null,'lr_tnum','lr_tbar');
-      });
-    }
+    playAudio(sec.audios[qi],function(){
+      var b=$('lr_aud_btn');if(b)b.textContent='▶ Replay';
+      var tw=$('lr_twrap');if(tw)tw.style.display='';
+      startQTimer(20,expire,null,'lr_tnum','lr_tbar');
+    });
   }
 }
 function renderListeningPanel(sec){
@@ -854,17 +859,12 @@ function renderListeningPanel(sec){
       <div class="ph"><div class="pt">Module ${S.lModule} — ${escH(typeLabel)}</div><div class="ps">${subLabel}Questions ${sec.qStart+1}–${sec.qStart+sec.qs.length} of ${totalQs}</div></div>
       <div class="card" style="text-align:center;padding:48px 24px;">
         <div style="font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--pri);margin-bottom:20px;">${escH(typeLabel)}</div>
-        <audio id="${audId}_aud" src="${sec.qAudio}" preload="auto" autoplay></audio>
+        ${mkAudioBtn('lp_aud_btn')}
       </div>`;
     // auto-advance to questions when audio ends
-    var aud=$(audId+'_aud');
-    if(aud){
-      aud.play().catch(function(){});
-      aud.addEventListener('waiting',function(){aud.play().catch(function(){});});
-      aud.onended=function(){
-        startListeningQs();
-      };
-    }
+    playAudio(sec.qAudio,function(){
+      startListeningQs();
+    });
     return;
   }
   // ── Questions phase (one at a time) ──
@@ -941,20 +941,16 @@ function renderSpLR(){
     <div class="prog-out"><div class="prog-in" style="width:${(qi+1)/lr.items.length*100}%"></div></div>
     <div class="card" style="margin-top:18px;text-align:center;">
       <div class="akshar" style="font-size:.88em;color:var(--gray);margin-bottom:12px;line-height:1.6;text-align:left;">${escH(lr.context)}</div>
-      <audio id="${audId}_aud" src="${item.audio}" preload="auto" autoplay></audio>
+      ${mkAudioBtn('sp_lr_aud_btn')}
       <div id="sp_lr_ring_wrap" style="display:none;">${mkRing('sp_lr_ring','sp_lr_num',10)}</div>
       <div style="margin-top:14px;padding:18px;border:1.5px dashed var(--border);border-radius:8px;color:var(--gray);font-size:.9em;">🎤 Repeat the sentence aloud</div>
     </div>`;
   var expire=isLast?function(){S.spPart=2;S.spQIdx=0;renderSpeaking();}:nextSpLR;
-  var aud=$(audId+'_aud');
-  if(aud){
-    aud.play().catch(function(){});
-    aud.addEventListener('waiting',function(){aud.play().catch(function(){});});
-    aud.addEventListener('ended',function(){
-      var w=$('sp_lr_ring_wrap');if(w)w.style.display='';
-      startQTimer(10,expire,'sp_lr_ring','sp_lr_num',null);
-    });
-  }
+  playAudio(item.audio,function(){
+    var b=$('sp_lr_aud_btn');if(b)b.textContent='▶ Replay';
+    var w=$('sp_lr_ring_wrap');if(w)w.style.display='';
+    startQTimer(10,expire,'sp_lr_ring','sp_lr_num',null);
+  });
 }
 function nextSpLR(){stopQTimer();if(S.spQIdx<D.sp.listenRepeat.items.length-1){S.spQIdx++;renderSpLR();}}
 function prevSpLR(){stopQTimer();if(S.spQIdx>0){S.spQIdx--;renderSpLR();}}
@@ -971,20 +967,16 @@ function renderSpInterview(){
     <div class="prog-out"><div class="prog-in" style="width:${(qi+1)/iv.qs.length*100}%"></div></div>
     <div class="card" style="margin-top:18px;text-align:center;">
       <div class="akshar" style="font-size:.88em;color:var(--gray);margin-bottom:12px;line-height:1.6;text-align:left;">${escH(iv.context)}</div>
-      <audio id="${audId}_aud" src="${q.audio}" preload="auto" autoplay></audio>
+      ${mkAudioBtn('sp_iv_aud_btn')}
       <div id="sp_iv_ring_wrap" style="display:none;">${mkRing('sp_iv_ring','sp_iv_num',45)}</div>
       <div style="margin-top:14px;padding:28px 18px;border:1.5px dashed var(--border);border-radius:8px;color:var(--gray);font-size:.9em;">🎤 Answer the question aloud</div>
     </div>`;
   var expire=isLast?goResults:nextSpIV;
-  var aud=$(audId+'_aud');
-  if(aud){
-    aud.play().catch(function(){});
-    aud.addEventListener('waiting',function(){aud.play().catch(function(){});});
-    aud.addEventListener('ended',function(){
-      var w=$('sp_iv_ring_wrap');if(w)w.style.display='';
-      startQTimer(45,expire,'sp_iv_ring','sp_iv_num',null);
-    });
-  }
+  playAudio(q.audio,function(){
+    var b=$('sp_iv_aud_btn');if(b)b.textContent='▶ Replay';
+    var w=$('sp_iv_ring_wrap');if(w)w.style.display='';
+    startQTimer(45,expire,'sp_iv_ring','sp_iv_num',null);
+  });
 }
 function nextSpIV(){stopQTimer();if(S.spQIdx<D.sp.interview.qs.length-1){S.spQIdx++;renderSpInterview();}}
 function prevSpIV(){stopQTimer();if(S.spQIdx>0){S.spQIdx--;renderSpInterview();}}
