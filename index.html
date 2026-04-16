@@ -820,6 +820,7 @@ function renderListeningLR(sec){
     var aud=$(audId+'_aud');
     if(aud){
       aud.play();
+      aud.addEventListener('pause',function(){if(!aud.ended)aud.play().catch(function(){});});
       aud.addEventListener('ended',function(){
         var tw=$('lr_twrap');if(tw)tw.style.display='';
         startQTimer(20,expire,null,'lr_tnum','lr_tbar');
@@ -845,6 +846,7 @@ function renderListeningPanel(sec){
     var aud=$(audId+'_aud');
     if(aud){
       aud.play();
+      aud.addEventListener('pause',function(){if(!aud.ended)aud.play().catch(function(){});});
       aud.onended=function(){
         startListeningQs();
       };
@@ -933,6 +935,7 @@ function renderSpLR(){
   var aud=$(audId+'_aud');
   if(aud){
     aud.play();
+    aud.addEventListener('pause',function(){if(!aud.ended)aud.play().catch(function(){});});
     aud.addEventListener('ended',function(){
       var w=$('sp_lr_ring_wrap');if(w)w.style.display='';
       startQTimer(10,expire,'sp_lr_ring','sp_lr_num',null);
@@ -962,6 +965,7 @@ function renderSpInterview(){
   var aud=$(audId+'_aud');
   if(aud){
     aud.play();
+    aud.addEventListener('pause',function(){if(!aud.ended)aud.play().catch(function(){});});
     aud.addEventListener('ended',function(){
       var w=$('sp_iv_ring_wrap');if(w)w.style.display='';
       startQTimer(45,expire,'sp_iv_ring','sp_iv_num',null);
