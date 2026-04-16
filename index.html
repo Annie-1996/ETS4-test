@@ -1288,36 +1288,35 @@ function renderIntro(){
   var structHTML='';
   if(isETS){
     structHTML=
-      '<div>📝 Module 1 &nbsp;— Complete the Words + Reading <span style="float:right;">20 Q · 12 min</span></div>'
-     +'<div>📝 Module 2 &nbsp;— Complete the Words + Reading <span style="float:right;">20 Q · 12 min</span></div>'
-     +'<div style="font-size:.8em;color:var(--acc);margin:2px 0 8px;">⚠️ Cannot return to Module 1 once Module 2 begins</div>'
-     +'<div>🎧 Listening Module 1 — Listen &amp; Respond + Conversations + Talks <span style="float:right;">18 Q · 10 min</span></div>'
-     +'<div>🎧 Listening Module 2 — Listen &amp; Respond + Conversations + Talks <span style="float:right;">16 Q · 10 min</span></div>'
-     +'<div>🔤 Writing Part 1 — Build a Sentence <span style="float:right;">10 Q · 5 min</span></div>'
-     +'<div>📧 Writing Part 2 — Email Writing <span style="float:right;">1 Task · 7 min</span></div>'
-     +'<div>💬 Writing Part 3 — Academic Discussion <span style="float:right;">1 Task · 10 min</span></div>'
-     +'<div>🎤 Speaking Part 1 — Listen and Repeat <span style="float:right;">7 items · 15 min</span></div>'
-     +'<div>🎤 Speaking Part 2 — Interview <span style="float:right;">4 questions</span></div>';
+      '<div>Reading Module 1 <span style="float:right;">20 Q · 12 min</span></div>'
+     +'<div>Reading Module 2 <span style="float:right;">20 Q · 12 min</span></div>'
+     +'<div style="font-size:.8em;color:var(--acc);margin:2px 0 8px;">Cannot return to Module 1 once Module 2 begins</div>'
+     +'<div>Listening Module 1 <span style="float:right;">18 Q · 10 min</span></div>'
+     +'<div>Listening Module 2 <span style="float:right;">16 Q · 10 min</span></div>'
+     +'<div>Writing Part 1 <span style="float:right;">10 Q · 5 min</span></div>'
+     +'<div>Writing Part 2 <span style="float:right;">1 Task · 7 min</span></div>'
+     +'<div>Writing Part 3 <span style="float:right;">1 Task · 10 min</span></div>'
+     +'<div>Speaking Part 1 <span style="float:right;">7 items</span></div>'
+     +'<div>Speaking Part 2 <span style="float:right;">4 Q · 15 min total</span></div>';
   } else {
     structHTML=
-      '<div>📝 Reading Part 1 &nbsp;— Complete the Words <span style="float:right;">10 Q</span></div>'
-     +'<div>📰 Reading Part 2 &nbsp;— Reading in Daily Life <span style="float:right;">15 Q</span></div>'
-     +'<div>🎓 Reading Part 3 &nbsp;— Academic Passages <span style="float:right;">15 Q</span></div>'
-     +'<div>🔤 Writing Part 1 &nbsp;&nbsp;— Build a Sentence <span style="float:right;">10 Q</span></div>'
-     +'<div>📧 Writing Part 2 &nbsp;&nbsp;— Email Writing <span style="float:right;">1 Task</span></div>'
-     +'<div>💬 Writing Part 3 &nbsp;&nbsp;— Academic Discussion <span style="float:right;">1 Task</span></div>';
+      '<div>Reading Part 1 <span style="float:right;">10 Q</span></div>'
+     +'<div>Reading Part 2 <span style="float:right;">15 Q</span></div>'
+     +'<div>Reading Part 3 <span style="float:right;">15 Q</span></div>'
+     +'<div>Writing Part 1 <span style="float:right;">10 Q</span></div>'
+     +'<div>Writing Part 2 <span style="float:right;">1 Task</span></div>'
+     +'<div>Writing Part 3 <span style="float:right;">1 Task</span></div>';
   }
   app().innerHTML=`
     <div class="intro">
-      <div style="font-size:3.2em;margin-bottom:6px;">📝</div>
       <div class="ititle">TOEFL iBT</div>
       <div style="font-size:1.4em;font-weight:800;color:var(--acc);margin-bottom:2px;">Practice Test <span id="test-num-intro"></span></div>
       <div style="font-size:.95em;color:var(--gray);margin-bottom:24px;">2026 Edition</div>
       <div class="iinfo">
-        <div class="icard"><h3>📖 Reading</h3><p>${rInfo}</p></div>
-        <div class="icard"><h3>🎧 Listening</h3><p>34 questions<br>20 minutes</p></div>
-        <div class="icard"><h3>✍️ Writing</h3><p>12 questions<br>23 minutes</p></div>
-        <div class="icard"><h3>🎤 Speaking</h3><p>11 items<br>15 minutes</p></div>
+        <div class="icard"><h3>Reading</h3><p>${rInfo}</p></div>
+        <div class="icard"><h3>Listening</h3><p>34 questions<br>20 minutes</p></div>
+        <div class="icard"><h3>Writing</h3><p>12 questions<br>23 minutes</p></div>
+        <div class="icard"><h3>Speaking</h3><p>11 items<br>15 minutes</p></div>
       </div>
       <div class="struct">
         <div style="font-weight:700;margin-bottom:10px;color:var(--txt);">Test Structure</div>
