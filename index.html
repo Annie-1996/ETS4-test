@@ -932,12 +932,7 @@ function renderSpLR(){
       <div class="akshar" style="font-size:.88em;color:var(--gray);margin-bottom:12px;line-height:1.6;text-align:left;">${escH(lr.context)}</div>
       ${mkAudio(item.audio,audId)}
       <div id="sp_lr_ring_wrap" style="display:none;">${mkRing('sp_lr_ring','sp_lr_num',10)}</div>
-      <div class="akshar" style="font-size:1.05em;margin:16px 0;padding:14px;background:#f5f0eb;border-radius:8px;border-left:3px solid var(--pri);text-align:left;">${escH(item.text)}</div>
       <div style="margin-top:14px;padding:18px;border:1.5px dashed var(--border);border-radius:8px;color:var(--gray);font-size:.9em;">🎤 Repeat the sentence aloud</div>
-    </div>
-    <div class="nav">
-      ${qi>0?`<button class="btn btn-gray" onclick="prevSpLR()">← Previous</button>`:'<div></div>'}
-      <button class="btn btn-acc" onclick="${nextFnStr}">${nextLbl}</button>
     </div>`;
   var expire=isLast?function(){S.spPart=2;S.spQIdx=0;renderSpeaking();}:nextSpLR;
   var aud=$(audId+'_aud');
@@ -963,12 +958,7 @@ function renderSpInterview(){
       <div class="akshar" style="font-size:.88em;color:var(--gray);margin-bottom:12px;line-height:1.6;text-align:left;">${escH(iv.context)}</div>
       ${mkAudio(q.audio,audId)}
       <div id="sp_iv_ring_wrap" style="display:none;">${mkRing('sp_iv_ring','sp_iv_num',45)}</div>
-      <div class="akshar" style="font-size:1em;margin:16px 0;padding:14px;background:#f5f0eb;border-radius:8px;border-left:3px solid var(--pri);text-align:left;">${escH(q.q)}</div>
       <div style="margin-top:14px;padding:28px 18px;border:1.5px dashed var(--border);border-radius:8px;color:var(--gray);font-size:.9em;">🎤 Answer the question aloud</div>
-    </div>
-    <div class="nav">
-      ${qi>0?`<button class="btn btn-gray" onclick="prevSpIV()">← Previous</button>`:'<div></div>'}
-      <button class="btn btn-acc" onclick="${nextFnStr}">${nextLbl}</button>
     </div>`;
   var expire=isLast?goResults:nextSpIV;
   var aud=$(audId+'_aud');
